@@ -15,9 +15,16 @@ export interface Booking {
   createdAt: string;
 }
 
-const DATABASE_URL = process.env.DATABASE_URL || "";
-
-const sql = neon(DATABASE_URL);
+function getSql() {
+  const dbUrl = process.env.DATABASE_URL;
+  if (!dbUrl) return null;
+  try {
+    return neon(dbUrl);
+  } catch (e) {
+    console.warn("Neon init warning:", e);
+    return null;
+  }
+}
 
 // Helper for local JSON backup storage
 const STORAGE_PATH = path.join(process.cwd(), "scratch", "bookings.json");
@@ -33,6 +40,8 @@ function ensureDirectoryExists() {
 let tableInitialized = false;
 async function initNeonTable() {
   if (tableInitialized) return;
+  const sql = getSql();
+  if (!sql) return;
   try {
     await sql`
       CREATE TABLE IF NOT EXISTS bookings (
@@ -56,14 +65,17 @@ async function initNeonTable() {
 
 export async function getBookingsDB(): Promise<Booking[]> {
   try {
-    await initNeonTable();
-    const rows = await sql`
-      SELECT id, name, email, phone, date, time, service, notes, status, created_at as "createdAt"
-      FROM bookings
-      ORDER BY created_at DESC
-    `;
-    if (rows && rows.length > 0) {
-      return rows as Booking[];
+    const sql = getSql();
+    if (sql) {
+      await initNeonTable();
+      const rows = await sql`
+        SELECT id, name, email, phone, date, time, service, notes, status, created_at as "createdAt"
+        FROM bookings
+        ORDER BY created_at DESC
+      `;
+      if (rows && rows.length > 0) {
+        return rows as Booking[];
+      }
     }
   } catch (err) {
     console.warn("Neon DB read error, using local storage fallback:", err);
@@ -94,22 +106,25 @@ export async function saveBookingDB(
 
   // Save to Neon Database
   try {
-    await initNeonTable();
-    await sql`
-      INSERT INTO bookings (id, name, email, phone, date, time, service, notes, status, created_at)
-      VALUES (
-        ${newBooking.id},
-        ${newBooking.name},
-        ${newBooking.email},
-        ${newBooking.phone || ""},
-        ${newBooking.date},
-        ${newBooking.time},
-        ${newBooking.service},
-        ${newBooking.notes || ""},
-        ${newBooking.status},
-        ${newBooking.createdAt}
-      )
-    `;
+    const sql = getSql();
+    if (sql) {
+      await initNeonTable();
+      await sql`
+        INSERT INTO bookings (id, name, email, phone, date, time, service, notes, status, created_at)
+        VALUES (
+          ${newBooking.id},
+          ${newBooking.name},
+          ${newBooking.email},
+          ${newBooking.phone || ""},
+          ${newBooking.date},
+          ${newBooking.time},
+          ${newBooking.service},
+          ${newBooking.notes || ""},
+          ${newBooking.status},
+          ${newBooking.createdAt}
+        )
+      `;
+    }
   } catch (err) {
     console.warn("Neon DB insert error, using local fallback:", err);
   }
@@ -132,12 +147,15 @@ export async function saveBookingDB(
 
 export async function updateBookingStatusDB(id: string, status: Booking["status"]): Promise<Booking | null> {
   try {
-    await initNeonTable();
-    await sql`
-      UPDATE bookings
-      SET status = ${status}
-      WHERE id = ${id}
-    `;
+    const sql = getSql();
+    if (sql) {
+      await initNeonTable();
+      await sql`
+        UPDATE bookings
+        SET status = ${status}
+        WHERE id = ${id}
+      `;
+    }
   } catch (err) {
     console.warn("Neon DB update error:", err);
   }

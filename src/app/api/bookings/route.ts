@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { getBookingsDB, saveBookingDB, updateBookingStatusDB } from "@/lib/bookingStore";
 import { Resend } from "resend";
 
+export const dynamic = "force-dynamic";
+
 const resendApiKey = process.env.RESEND_API_KEY || "";
 const resend = new Resend(resendApiKey);
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "grizzlygoegym@gmail.com";

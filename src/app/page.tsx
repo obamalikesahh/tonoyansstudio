@@ -10,6 +10,13 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [submittedBooking, setSubmittedBooking] = useState<any | null>(null);
 
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      setIntroFinished(true);
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, []);
+
   const [formData, setFormData] = useState({
     anrede: "Herr",
     vorname: "",

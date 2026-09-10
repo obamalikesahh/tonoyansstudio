@@ -115,19 +115,19 @@ export default function Logo3D({ onIntroComplete, interactive = true }: Logo3DPr
 
         setLoading(false);
 
-        // Ideal 2.5s Spin Intro Timeline (Perfect smooth speed!)
+        // Fast 1.5s Spin Intro Timeline
         const tl = gsap.timeline({
           onComplete: () => {
             setIntroDone(true);
             controls.autoRotate = true;
-            controls.autoRotateSpeed = 1.5;
+            controls.autoRotateSpeed = 2.5;
             if (onIntroComplete) onIntroComplete();
           },
         });
 
         tl.to(camera.position, {
           z: 5.2,
-          duration: 2.5,
+          duration: 1.5,
           ease: "power2.out",
         }, 0);
 
@@ -135,13 +135,13 @@ export default function Logo3D({ onIntroComplete, interactive = true }: Logo3DPr
           x: targetScale,
           y: targetScale,
           z: targetScale,
-          duration: 2.5,
+          duration: 1.5,
           ease: "power2.out",
         }, 0);
 
         tl.to(pivotGroup.rotation, {
-          y: Math.PI * 4, // 2 full smooth rotations over 2.5 seconds
-          duration: 2.5,
+          y: Math.PI * 4, // 2 full smooth fast rotations
+          duration: 1.5,
           ease: "power1.inOut",
         }, 0);
       },
@@ -207,6 +207,16 @@ export default function Logo3D({ onIntroComplete, interactive = true }: Logo3DPr
 
   return (
     <div className="relative w-full max-w-xl sm:max-w-2xl aspect-square flex items-center justify-center select-none group mx-auto my-auto min-h-[350px]">
+      {/* Loading Spinner */}
+      {loading && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center space-y-3 z-10">
+          <div className="w-10 h-10 border-2 border-[#E8D8C4]/20 border-t-[#E8D8C4] rounded-full animate-spin" />
+          <span className="text-xs font-serif text-[#E8D8C4] tracking-widest uppercase animate-pulse">
+            Tonoyans Studio 3D...
+          </span>
+        </div>
+      )}
+
       {/* Subtle Cream Marble Halo Glow */}
       <div className={`absolute inset-4 rounded-full bg-gradient-to-tr from-[#E8D8C4]/20 via-[#D5C2A5]/15 to-transparent blur-3xl transition-opacity duration-700 pointer-events-none ${introDone ? "opacity-80 group-hover:opacity-100" : "opacity-40"}`} />
 

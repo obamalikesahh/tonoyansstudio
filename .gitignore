@@ -39,3 +39,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# scratch & temp
+scratch/
+50d932928b5cb46fad34423feaccb96d.glb
+

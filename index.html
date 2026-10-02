@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TONOYANS STUDIO — Friseurmeisterin Nazik Tonoyan | Schleswig</title>
+  <meta name="description" content="TONOYANS STUDIO — High-End Friseurhandwerk, Meister-Balayage, Coloration und Pflege von Nazik Tonoyan in Schleswig." />
+  
+  <!-- Google Fonts: Space Grotesk & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- GSAP & ScrollTrigger -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body class="loading-state">
+
+  <!-- Noise Overlay -->
+  <div class="noise"></div>
+  <div class="scroll-progress"></div>
+
+  <!-- Editorial Preloader -->
+  <div class="preloader" id="preloader">
+    <span>TONOYANS STUDIO</span>
+  </div>
+
+  <!-- Floating Header Navigation -->
+  <header class="site-header" id="navbar">
+    <a href="#top" class="logo">
+      <b>TONOYANS STUDIO</b>
+    </a>
+    
+    <nav class="nav" id="nav-menu">
+      <a href="#studio">Studio & Vision</a>
+      <a href="#uber-mich">Über Nazik</a>
+      <a href="#leistungen">Leistungen</a>
+      <a href="#preisliste">Preise & Buchung</a>
+      <a href="#galerie">Galerie</a>
+      <a href="#kontakt">Kontakt</a>
+    </nav>
+
+    <a href="#preisliste" class="label">
+      <span class="label-2">Ein Termin buchen</span>
+      <span class="label-3">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 11" aria-hidden="true" focusable="false" width="14" height="11" class="icon">
+          <path d="M0.5 5.36L13.46 5.36M8.6 10.22L13.46 5.36L8.6 0.5" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="wrapper"></path>
+        </svg>
+      </span>
+    </a>
+
+    <button class="mobile-toggle-btn" id="mobile-toggle" aria-label="Menü öffnen">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+  </header>
+
+  <main id="top">
+
+    <!-- Hero Section (Framer Salonix Look & Feel tailored to TONOYANS STUDIO) -->
+    <section class="hero section">
+      <div class="hero-media">
+        <img src="./Salon/hero_work.png" alt="Friseurmeisterin Nazik Tonoyan bei der Arbeit im TONOYANS STUDIO" class="hero-bg-img" />
+        <div class="hero-overlay-dark"></div>
+      </div>
+
+      <div class="hero-content-wrapper">
+        <div class="hero-badge">
+          <span class="badge-num">#01</span>
+          <span class="badge-text">PREMIUM HAIR SALON</span>
+        </div>
+
+        <h1 class="hero-title display">TONOYANS</h1>
+
+        <p class="hero-subtitle">
+          Meisterhafte Haarkunst, individuell abgestimmt auf Ihre Haarstruktur, Ihre Persönlichkeit und Ihren Wunschlook.
+        </p>
+
+        <div class="hero-actions">
+          <a href="#preisliste" class="label">
+            <span class="label-2">Ein Termin buchen</span>
+            <span class="label-3">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 11" aria-hidden="true" focusable="false" width="14" height="11" class="icon">
+                <path d="M0.5 5.36L13.46 5.36M8.6 10.22L13.46 5.36L8.6 0.5" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="wrapper"></path>
+              </svg>
+            </span>
+          </a>
+          <a href="#kontakt" class="btn-hero btn-hero-glass">
+            <span>Kontakt</span>
+            <i class="fa-solid fa-arrow-right"></i>
+          </a>
+        </div>
+      </div>
+
+      <!-- Floating Featured Service Badge (Bottom Left - Auto Rotates Every 5s) -->
+      <div class="hero-featured-card">
+        <a href="#preisliste" class="featured-card-inner" id="hero-featured-link">
+          <img src="./Arbeit/825261306_1494108739169611_8302482309275974718_n.jpg" alt="Meister Balayage & Styling" class="featured-img" id="hero-featured-img" />
+          <div class="featured-text">
+            <strong id="hero-featured-title">BALAYAGE & AIRTOUCH</strong>
+            <small id="hero-featured-subtitle">Beliebteste Meister-Behandlung • ab 150 € →</small>
+          </div>
+          <span class="featured-plus"><i class="fa-solid fa-plus"></i></span>
+        </a>
+      </div>
+
+      <!-- Floating Slider Dots (Bottom Right) -->
+      <div class="hero-slider-dots">
+        <span class="dot active" data-index="0"></span>
+        <span class="dot" data-index="1"></span>
+        <span class="dot" data-index="2"></span>
+      </div>
+    </section>
+
+    <!-- Master Stylists & 4-Column Framer Showcase Section -->
+    <section class="framer-craft-section paper" id="about-us">
+      <div class="container text-center">
+        <h2 class="framer-statement display">
+          MASTER STYLISTS. PREMIUM PRODUCTS. ZERO COMPROMISE.<br>
+          THIS IS WHAT GREAT HAIR ACTUALLY LOOKS LIKE.
+        </h2>
+        <div class="framer-statement-cta">
+          <a href="#preisliste" class="label">
+            <span class="label-2">Ein Termin buchen</span>
+            <span class="label-3">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 11" aria-hidden="true" focusable="false" width="14" height="11" class="icon">
+                <path d="M0.5 5.36L13.46 5.36M8.6 10.22L13.46 5.36L8.6 0.5" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="wrapper"></path>
+              </svg>
+            </span>
+          </a>
+        </div>
+
+        <!-- Skiper #35 Hover Expand Banner for CRAFT, STUDIO, ARTISTRY, RESULTS -->
+        <div class="skiper35-expand-container framer-banner-grid-skiper">
+          <div class="expand-card active">
+            <div class="expand-card-bg">
+              <img src="./Arbeit/craft.png" alt="CRAFT - Hair Wash & Care" />
+            </div>
+            <div class="expand-card-vertical-title">
+              <span>01 / PREPARATION</span>
+              <strong>CRAFT ® Care</strong>
+            </div>
+            <div class="expand-card-content">
+              <span class="expand-tag">01 / CRAFT</span>
+              <h3 class="display">CRAFT</h3>
+              <p>Tiefenwirksame Reinigung, Kopfhautpflege & Vorbereitung für das perfekte Staging.</p>
+            </div>
+          </div>
+
+          <div class="expand-card">
+            <div class="expand-card-bg">
+              <img src="./Salon/DSC03348.JPG" alt="STUDIO - Salon Interior" />
+            </div>
+            <div class="expand-card-vertical-title">
+              <span>02 / ATMOSPHERE</span>
+              <strong>STUDIO ® Ambience</strong>
+            </div>
+            <div class="expand-card-content">
+              <span class="expand-tag">02 / STUDIO</span>
+              <h3 class="display">STUDIO</h3>
+              <p>Exklusives Wohlfühlambiente & individuelle Meisterberatung in Schleswig.</p>
+            </div>
+          </div>
+
+          <div class="expand-card">
+            <div class="expand-card-bg">
+              <img src="./Arbeit/825310074_1396808228712906_4132944310838981144_n.jpg" alt="ARTISTRY - Balayage Meisterhandwerk" />
+            </div>
+            <div class="expand-card-vertical-title">
+              <span>03 / COLOR & STYLE</span>
+              <strong>ARTISTRY ® Balayage</strong>
+            </div>
+            <div class="expand-card-content">
+              <span class="expand-tag">03 / ARTISTRY</span>
+              <h3 class="display">ARTISTRY</h3>
+              <p>Freihand-Balayage, Airtouch & brillante Farbverläufe in Perfektion.</p>
+            </div>
+          </div>
+
+          <div class="expand-card">
+            <div class="expand-card-bg">
+              <img src="./Arbeit/results.png" alt="RESULTS - Shine & Perfection" />
+            </div>
+            <div class="expand-card-vertical-title">
+              <span>04 / SHINE & FINISH</span>
+              <strong>RESULTS ® Perfection</strong>
+            </div>
+            <div class="expand-card-content">
+              <span class="expand-tag">04 / RESULTS</span>
+              <h3 class="display">RESULTS</h3>
+              <p>Gesundes, strahlendes Haar & langanhaltendes Finish für Ihr Wunschergebnis.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Intro / Vision Section -->
+    <section class="intro paper diagonal-top" id="studio">
+      <div class="container grid12">
+        <div class="intro-meta eyebrow">
+          <span>01 / Studio & Meistervision</span>
+          <span>© 2026 EST. SCHLESWIG</span>
+        </div>
+        <h1 class="intro-title display">
+          <div class="line-mask"><span>Schönheit beginnt</span></div>
+          <div class="line-mask"><span>mit rundum gesundem,</span></div>
+          <div class="line-mask"><span>strahlendem Haar.</span></div>
+        </h1>
+      </div>
+
+      <div class="container grid12 intro-lower">
+        <div class="intro-portrait">
+          <img src="./Salon/hero_work.png" alt="Friseurmeisterin Nazik Tonoyan bei der Arbeit im TONOYANS STUDIO">
+        </div>
+        
+        <div class="keywords">
+          Meisterhandwerk
+          <br>Balayage
+          <br>Coloration
+          <br>Gesundes Haar
+          <br>Styling
+        </div>
+
+        <div class="intro-copy">
+          <p>
+            Im TONOYANS STUDIO steht der Mensch als Ganzes im Mittelpunkt. Wir nehmen uns die Zeit für eine ausführliche, typgerechte Beratung.
+          </p>
+          <p>
+            Mit handwerklicher Präzision, Leidenschaft und schonenden Premium-Produkten erschaffen wir Frisurenergebnisse, die Ihre Persönlichkeit perfekt unterstreichen.
+          </p>
+        </div>
+
+        <div class="stats-mini">
+          <div>
+            <strong data-count="2026">0</strong>
+            <span>Meisterprüfung abgelegt</span>
+          </div>
+          <div>
+            <strong data-count="100">%</strong>
+            <span>Leidenschaft & Pflege</span>
+          </div>
+          <div>
+            <strong data-count="15">Aug.</strong>
+            <span>Salon Eröffnung 2026</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Interactive Ticker Bar -->
+    <div class="ticker paper">
+      <div class="ticker-track">
+        <span>TONOYANS STUDIO</span>
+        <span>MEISTERBETRIEB</span>
+        <span>BALAYAGE & AIRTOUCH</span>
+        <span>COLORATION</span>
+        <span>GESUNDES HAAR</span>
+        <span>STYLING & SHINE</span>
+        <span>SCHLESWIG</span>
+        <span>TONOYANS STUDIO</span>
+        <span>MEISTERBETRIEB</span>
+        <span>BALAYAGE & AIRTOUCH</span>
+        <span>COLORATION</span>
+      </div>
+    </div>
+
+    <!-- Über Mich Story Section -->
+    <section class="section about-story-section paper" id="uber-mich">
+      <div class="container grid12">
+        <div class="story-left-meta eyebrow grid-span-3">
+          <span>02 / Über Nazik Tonoyan</span>
+          <span>Friseurmeisterin & Inhaberin</span>
+        </div>
+
+        <div class="story-right-content grid-span-9">
+          <h2 class="display story-heading">Die Geschichte hinter meinem Traum.</h2>
+          
+          <blockquote class="editorial-quote">
+            „Für mich bedeutet Friseurhandwerk mehr als nur Schneiden und Färben. Mir ist wichtig, auf jeden Menschen individuell einzugehen und Haare so zu gestalten, dass sie zur Persönlichkeit passen.“
+          </blockquote>
+
+          <div class="story-paragraphs">
+            <p>
+              Mein Name ist <strong>Nazik Tonoyan</strong> und meine Leidenschaft für Haare und Schönheit begleitet mich schon seit vielen Jahren. Bereits in meiner Heimat Armenien habe ich den Friseurberuf erlernt.
+            </p>
+            <p>
+              Seit 2015 lebe ich in Deutschland und habe mich entschieden, meinen beruflichen Weg hier noch einmal neu aufzubauen. 2018 begann ich meine Ausbildung zur Friseurin, die ich erfolgreich abgeschlossen habe.
+            </p>
+            <p>
+              Im <strong>Januar 2026</strong> habe ich erfolgreich meine <strong>Meisterprüfung im Friseurhandwerk</strong> abgelegt. Am <strong>15. August 2026</strong> folgte schließlich der größte Schritt: die Eröffnung meines eigenen Salons <strong>TONOYANS STUDIO</strong> in Schleswig.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Featured Services Grid (Editorial Look) -->
+    <section class="capabilities dark diagonal-top" id="leistungen">
+      <div class="container">
+        <div class="eyebrow">03 / Exklusive Behandlungen</div>
+        
+        <div class="cap-intro">
+          <div class="cap-statement display">
+            <span>Präzision im Schnitt.</span>
+            <span>Brillanz in der Farbe.</span>
+            <span>Gesundheit im Haar.</span>
+          </div>
+        </div>
+
+        <div class="cap-row">
+          <div class="num">01</div>
+          <h3 class="display">Haarschnitt</h3>
+          <p>Individuelle Schnitte, perfekt auf deine Gesichtsform und deine Haarstruktur abgestimmt. Für Damen, Herren & Kinder.</p>
+        </div>
+
+        <div class="cap-row">
+          <div class="num">02</div>
+          <h3 class="display">Coloration & Balayage</h3>
+          <p>Airtouch, Freihand-Balayage, Strähnen & Glossing für ausdrucksstarke Farben und natürliche Übergänge.</p>
+        </div>
+
+        <div class="cap-row">
+          <div class="num">03</div>
+          <h3 class="display">Glowy Beauty & Pflege</h3>
+          <p>Tiefenwirksame Masken, Kopfhautbehandlungen & Massagen für seidenweichen Glanz und gestärktes Haar.</p>
+        </div>
+
+        <div class="cap-row">
+          <div class="num">04</div>
+          <h3 class="display">Styling & Augen</h3>
+          <p>Föhnfrisuren, Event-Wellen, Augenbrauen zupfen/färben & Wimpernbehandlungen.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Planity Online-Buchung & Preisliste Section -->
+    <section class="engagement paper diagonal-top" id="preisliste">
+      <div class="container">
+        <div class="eyebrow">04 / Online-Buchung & Preise</div>
+        <h2 class="section-title display">Wähle deine Behandlung</h2>
+
+        <div class="plans">
+
+          <!-- Damen -->
+          <div class="plan">
+            <small>01 / Damen</small>
+            <h3>Schnitt & Styling</h3>
+            <div class="price">ab 40 €</div>
+            <div class="plan-interactive-items">
+              <div class="plan-item-row">
+                <div class="item-text">
+                  <strong>Kurzhaarschnitt</strong>
+                  <small>Waschen, Schnitt & Style • 45 Min.</small>
+                </div>
+                <button class="btn-select-mini booking-btn" data-service="Kurzhaarschnitt Damen" data-price="ab 55 €">Auswählen</button>
+              </div>
+
+              <div class="plan-item-row">
+                <div class="item-text">
+                  <strong>Langhaarschnitt</strong>
+                  <small>Waschen, Schnitt & Style • 60 Min.</small>
+                </div>
+                <button class="btn-select-mini booking-btn" data-service="Langhaarschnitt Damen" data-price="ab 57 €">Auswählen</button>
+              </div>
+
+              <div class="plan-item-row">
+                <div class="item-text">
+                  <strong>Trockenschnitt Damen</strong>
+                  <small>Auffrischungs-Schnitt • 30 Min.</small>
+                </div>
+                <button class="btn-select-mini booking-btn" data-service="Trockenschnitt Damen" data-price="ab 40 €">Auswählen</button>
+              </div>
+
+              <div class="plan-item-row">
+                <div class="item-text">
+                  <strong>Waschen & Stylen / Föhnen</strong>
+                  <small>Verwöhnwäsche & Style • 35 Min.</small>
+                </div>
+                <button class="btn-select-mini booking-btn" data-service="Waschen & Stylen Damen" data-price="ab 40 €">Auswählen</button>
+              </div>
+
+              <div class="plan-item-row">
+                <div class="item-text">
+                  <strong>Coloration & Ansatz</strong>
+                  <small>Gleichmäßige Abdeckung • 60 Min.</small>
+                </div>
+                <button class="btn-select-mini booking-btn" data-service="Coloration & Ansatz" data-price="ab 50 €">Auswählen</button>
+              </div>
+
+              <div class="plan-item-row">
+                <div class="item-text">
+                  <strong>Balayage / Airtouch / Strähnen</strong>
+                  <small>Exklusive Farbtechnik • 120 Min.</small>
+                </div>
+                <button class="btn-select-mini booking-btn" data-service="Balayage / Airtouch" data-price="ab 150 €">Auswählen</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Herren -->
+          <div class="plan">
+            <small>02 / Herren</small>
+            <h3>Herren & Bart</h3>
+            <div class="price">ab 28 €</div>
+            <div class="plan-interactive-items">
+              <div class="plan-item-row">
+                <div class="item-text">
+                  <strong>Trockenschnitt Herren</strong>
+                  <small>Präziser Haarschnitt • 30 Min.</small>
+                </div>
+                <button class="btn-select-mini booking-btn" data-service="Trockenschnitt Herren" data-price="ab 28 €">Auswählen</button>
+              </div>
+
+              <div class="plan-item-row">
+                <div class="item-text">
+                  <strong>Waschen, Schneiden & Stylen</strong>
+                  <small>Inkl. Kopfwäsche & Style • 40 Min.</small>
+                </div>
+                <button class="btn-select-mini booking-btn" data-service="Herren Waschen & Schnitt" data-price="ab 35 €">Auswählen</button>
+              </div>
+
+              <div class="plan-item-row">
+                <div class="item-text">
+                  <strong>Kopfmassage</strong>
+                  <small>Durchblutung & Entspannung • 15 Min.</small>
+                </div>
+                <button class="btn-select-mini booking-btn" data-service="Kopfmassage Herren" data-price="ab 10 €">Auswählen</button>
+              </div>
+
+              <div class="plan-item-row">
+                <div class="item-text">
+                  <strong>Bartpflege (Maschine)</strong>
+                  <small>Form & Konturenschnitt • 15 Min.</small>
+                </div>
+                <button class="btn-select-mini booking-btn" data-service="Bartpflege (Maschine)" data-price="ab 5 €">Auswählen</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Kinder & Pflege -->
+          <div class="plan dark-card">
+            <small>03 / Pflege & Extras</small>
+            <h3>Haarpflege & Beauty</h3>
+            <div class="price">ab 10 €</div>
+            <div class="plan-interactive-items">
+              <div class="plan-item-row">
+                <div class="item-text">
+                  <strong>Kinderhaarschnitt</strong>
+                  <small>Für Kinder bis 12 Jahre • 30 Min.</small>
+                </div>
+                <button class="btn-select-mini booking-btn" data-service="Kinderhaarschnitt" data-price="ab 20 €">Auswählen</button>
+              </div>
+
+              <div class="plan-item-row">
+                <div class="item-text">
+                  <strong>Intensiv Haarpflege</strong>
+                  <small>Tiefenmaske & Rekonstruktion • 20 Min.</small>
+                </div>
+                <button class="btn-select-mini booking-btn" data-service="Intensiv Haarpflege" data-price="ab 25 €">Auswählen</button>
+              </div>
+
+              <div class="plan-item-row">
+                <div class="item-text">
+                  <strong>Kopfhautbehandlung</strong>
+                  <small>Beruhigende Pflege • 15 Min.</small>
+                </div>
+                <button class="btn-select-mini booking-btn" data-service="Kopfhautbehandlung" data-price="ab 15 €">Auswählen</button>
+              </div>
+
+              <div class="plan-item-row">
+                <div class="item-text">
+                  <strong>Augenbrauen zupfen/färben</strong>
+                  <small>Perfekte Form & Farbe • 15 Min.</small>
+                </div>
+                <button class="btn-select-mini booking-btn" data-service="Augenbrauen zupfen/färben" data-price="ab 10 €">Auswählen</button>
+              </div>
+
+              <div class="plan-item-row">
+                <div class="item-text">
+                  <strong>Wimpern färben</strong>
+                  <small>Intensiver Blick • 15 Min.</small>
+                </div>
+                <button class="btn-select-mini booking-btn" data-service="Wimpern färben" data-price="ab 15 €">Auswählen</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- Staggered Overlap Gallery Section -->
+    <!-- Skiper #35 Hover Expand & #16 Card Stack Gallery Section -->
+    <section class="archive dark" id="galerie">
+      <div class="container">
+        <div class="eyebrow" style="margin-bottom:20px; color: var(--acid);">05 / GALERIE & ARBEITEN</div>
+        <h2 class="display" style="font-size: clamp(50px, 8vw, 130px); margin-bottom: 30px;">Meisterliche Impressionen</h2>
+
+        <div class="gallery-tabs-row">
+          <button class="g-tab-btn active" data-tab="all">Alle Bilder</button>
+          <button class="g-tab-btn" data-tab="arbeit">Unsere Arbeiten</button>
+          <button class="g-tab-btn" data-tab="salon">Salon Interieur</button>
+          <button class="g-tab-btn" data-tab="draussen">Außenansicht</button>
+        </div>
+
+        <!-- Skiper #16 Card Stack Scroll Feature - All 11 Images -->
+        <div class="skiper16-card-stack-wrapper">
+          <div class="card-stack-hint">
+            <i class="fa-solid fa-arrow-down-long"></i> Scrollen Sie nach unten für den Card-Stack-Effekt
+          </div>
+
+          <div class="card-stack-container" id="card-stack-container">
+            <!-- Card 1 -->
+            <div class="stack-card stack-card-1 arbeit">
+              <img src="./Arbeit/825261306_1494108739169611_8302482309275974718_n.jpg" alt="Balayage & Glow Styling" />
+              <div class="stack-card-overlay">
+                <span class="stack-card-tag">01 / MEISTER BALAYAGE</span>
+                <h3 class="stack-card-title">Balayage & Airtouch Refinement</h3>
+                <p class="stack-card-desc">Handgezeichnete Highlights mit sanften Farbverläufen & seidenweichem Glanz.</p>
+              </div>
+            </div>
+
+            <!-- Card 2 -->
+            <div class="stack-card stack-card-2 arbeit">
+              <img src="./Arbeit/825261311_2547033662477495_252625529617833503_n.jpg" alt="Brillante Coloration" />
+              <div class="stack-card-overlay">
+                <span class="stack-card-tag">02 / MEISTER COLORATION</span>
+                <h3 class="stack-card-title">Brillante Coloration & Glossing</h3>
+                <p class="stack-card-desc">Langanhaltende Farbintensität & schonende Tiefenpflege für maximales Volumen.</p>
+              </div>
+            </div>
+
+            <!-- Card 3 -->
+            <div class="stack-card stack-card-3 arbeit">
+              <img src="./Arbeit/825310074_1396808228712906_4132944310838981144_n.jpg" alt="Glanz & Wellen" />
+              <div class="stack-card-overlay">
+                <span class="stack-card-tag">03 / GLANZ & STYLING</span>
+                <h3 class="stack-card-title">Perfektionierte Wellen & Veredelung</h3>
+                <p class="stack-card-desc">Geschmeidiger Schwung & luxuriöse Pflege für Ihre Traumfrisur.</p>
+              </div>
+            </div>
+
+            <!-- Card 4 -->
+            <div class="stack-card stack-card-4 arbeit">
+              <img src="./Arbeit/825310990_1827416191582661_7766655130713427684_n.jpg" alt="Airtouch Blonding" />
+              <div class="stack-card-overlay">
+                <span class="stack-card-tag">04 / AIRTOUCH BLONDING</span>
+                <h3 class="stack-card-title">Perfektioniertes Meisterblond</h3>
+                <p class="stack-card-desc">Schonende Aufhellungstechniken abgestimmt auf Ihre natürliche Haarstruktur.</p>
+              </div>
+            </div>
+
+            <!-- Card 5 -->
+            <div class="stack-card stack-card-5 arbeit">
+              <img src="./Arbeit/825311061_2587310818398486_6278115156680709687_n.jpg" alt="Schnitt & Glanzstärkung" />
+              <div class="stack-card-overlay">
+                <span class="stack-card-tag">05 / PRÄZISIONSSCHNITT</span>
+                <h3 class="stack-card-title">Haarschnitt & Glanzstärkung</h3>
+                <p class="stack-card-desc">Millimetergenauer Schnitt kombiniert mit aufbauenden Pflegewirkstoffen.</p>
+              </div>
+            </div>
+
+            <!-- Card 6 -->
+            <div class="stack-card stack-card-6 salon">
+              <img src="./Salon/DSC03348.JPG" alt="Salon Rezeption" />
+              <div class="stack-card-overlay">
+                <span class="stack-card-tag">06 / SALON INTERIEUR</span>
+                <h3 class="stack-card-title">Empfang & Rezeption</h3>
+                <p class="stack-card-desc">Herzlicher Empfang im modern gestalteten TONOYANS STUDIO in Schleswig.</p>
+              </div>
+            </div>
+
+            <!-- Card 7 -->
+            <div class="stack-card stack-card-7 salon">
+              <img src="./Salon/DSC03349.JPG" alt="Stylingplätze" />
+              <div class="stack-card-overlay">
+                <span class="stack-card-tag">07 / STYLINGBEREICH</span>
+                <h3 class="stack-card-title">Moderne Frisierstühle & Spiegel</h3>
+                <p class="stack-card-desc">Ergonomische Plätze und perfektes Licht für Ihre persönliche Auszeit.</p>
+              </div>
+            </div>
+
+            <!-- Card 8 -->
+            <div class="stack-card stack-card-8 salon">
+              <img src="./Salon/DSC03350.JPG" alt="Waschbereich" />
+              <div class="stack-card-overlay">
+                <span class="stack-card-tag">08 / WASH & RELAX</span>
+                <h3 class="stack-card-title">Entspannungs-Waschbereich</h3>
+                <p class="stack-card-desc">Wohltuende Kopfhautmassagen und Pflegeanwendungen zum Entspannen.</p>
+              </div>
+            </div>
+
+            <!-- Card 9 -->
+            <div class="stack-card stack-card-9 salon">
+              <img src="./Salon/DSC03351.JPG" alt="Licht & Ambiente" />
+              <div class="stack-card-overlay">
+                <span class="stack-card-tag">09 / AMBIENTE</span>
+                <h3 class="stack-card-title">Design & Atmosphäre</h3>
+                <p class="stack-card-desc">Warme Töne, edles Lichtkonzept und Liebe zum Detail.</p>
+              </div>
+            </div>
+
+            <!-- Card 10 -->
+            <div class="stack-card stack-card-10 draussen">
+              <img src="./Draußen/DSC03341.JPG" alt="Fassade Schleswig" />
+              <div class="stack-card-overlay">
+                <span class="stack-card-tag">10 / AUSSENANSICHT</span>
+                <h3 class="stack-card-title">Studio Fassade Schleswig</h3>
+                <p class="stack-card-desc">Zentral gelegen am Stadtweg 47 in Schleswig.</p>
+              </div>
+            </div>
+
+            <!-- Card 11 -->
+            <div class="stack-card stack-card-11 draussen">
+              <img src="./Draußen/DSC03344.JPG" alt="Eingang Schaufenster" />
+              <div class="stack-card-overlay">
+                <span class="stack-card-tag">11 / EINGANGSBEREICH</span>
+                <h3 class="stack-card-title">Logo & Schaufenster</h3>
+                <p class="stack-card-desc">Willkommen bei Friseurmeisterin Nazik Tonoyan.</p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Instagram Section -->
+    <section class="journal paper" id="instagram">
+      <div class="container">
+        <div class="eyebrow" style="margin-bottom:60px">06 / Instagram & Reels</div>
+        
+        <div class="journal-grid">
+          <a href="https://www.instagram.com/tonoyans_studio/reels/" target="_blank" class="journal-item">
+            <div class="journal-img">
+              <img src="./Arbeit/825261306_1494108739169611_8302482309275974718_n.jpg" alt="Instagram Reel" />
+            </div>
+            <div class="journal-meta">
+              <span>Balayage & Transformation</span>
+              <span>Reel abspielen ↗</span>
+            </div>
+          </a>
+
+          <a href="https://www.instagram.com/tonoyans_studio/reels/" target="_blank" class="journal-item">
+            <div class="journal-img">
+              <img src="./Arbeit/825310990_1827416191582661_7766655130713427684_n.jpg" alt="Instagram Reel 2" />
+            </div>
+            <div class="journal-meta">
+              <span>Airtouch Blond Highlight</span>
+              <span>Reel abspielen ↗</span>
+            </div>
+          </a>
+
+          <a href="https://www.instagram.com/tonoyans_studio/reels/" target="_blank" class="journal-item">
+            <div class="journal-img">
+              <img src="./Salon/DSC03348.JPG" alt="Studio Tour" />
+            </div>
+            <div class="journal-meta">
+              <span>Studio Tour Schleswig</span>
+              <span>Reel abspielen ↗</span>
+            </div>
+          </a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Interactive Booking Modal mit SMS-Verifizierung -->
+  <div class="booking-modal-overlay" id="booking-modal">
+    <div class="booking-modal-content">
+      <button class="modal-close-btn" id="modal-close">&times;</button>
+      
+      <div class="modal-header">
+        <i class="fa-solid fa-shield-halved"></i>
+        <h3>Termin reservieren</h3>
+        <p>TONOYANS STUDIO • SMS-Verifikation</p>
+      </div>
+
+      <div class="selected-service-banner">
+        <div>
+          <span class="sel-label">Gewählte Behandlung:</span>
+          <strong id="modal-service-title">Damen Behandlung</strong>
+        </div>
+        <span class="sel-price" id="modal-service-price">ab 55 €</span>
+      </div>
+
+      <!-- Step 1: Formular -->
+      <form class="modal-form" id="booking-form-step1">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Name, Vorname *</label>
+            <input type="text" id="cust-name" required placeholder="z. B. Anna Muster" />
+          </div>
+          <div class="form-group">
+            <label>Handynummer (für SMS-Code) *</label>
+            <input type="tel" id="cust-phone" required placeholder="z. B. +49 176 12345678" />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Wunschdatum *</label>
+            <input type="date" id="cust-date" required />
+          </div>
+          <div class="form-group">
+            <label>Wunschuhrzeit *</label>
+            <select id="cust-time" required>
+              <option value="">Uhrzeit wählen...</option>
+              <option value="09:00">09:00 Uhr</option>
+              <option value="10:30">10:30 Uhr</option>
+              <option value="12:00">12:00 Uhr</option>
+              <option value="14:00">14:00 Uhr</option>
+              <option value="16:00">16:00 Uhr</option>
+            </select>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block btn-lg">
+          <i class="fa-solid fa-paper-plane"></i> SMS-Code anfordern
+        </button>
+      </form>
+
+      <!-- Step 2: Code -->
+      <form class="modal-form hidden-step" id="booking-form-step2">
+        <div class="sms-notice-box">
+          <i class="fa-solid fa-mobile-screen-button"></i>
+          <div>
+            <strong>SMS-Code gesendet!</strong>
+            <p>Wir haben einen 4-stelligen Verifizierungscode an <span id="sent-phone-display">+49 176 ...</span> gesendet.</p>
+          </div>
+        </div>
+
+        <div class="form-group text-center">
+          <label class="code-label">Gib deinen 4-stelligen Code ein:</label>
+          <div class="code-inputs-group">
+            <input type="text" maxlength="1" class="code-digit" required />
+            <input type="text" maxlength="1" class="code-digit" required />
+            <input type="text" maxlength="1" class="code-digit" required />
+            <input type="text" maxlength="1" class="code-digit" required />
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block btn-lg">
+          <i class="fa-solid fa-circle-check"></i> Code verifizieren & Termin bestätigen
+        </button>
+        <button type="button" class="btn btn-link btn-block" id="back-to-step1">Telefonnummer ändern</button>
+      </form>
+
+      <!-- Step 3: Erfolgsmeldung -->
+      <div class="modal-success-screen hidden-step" id="booking-success">
+        <div class="success-icon"><i class="fa-solid fa-circle-check"></i></div>
+        <h3>Termin erfolgreich bestätigt!</h3>
+        <p>Vielen Dank. Ihre Buchung im <strong>TONOYANS STUDIO</strong> wurde erfolgreich verifiziert.</p>
+        <button type="button" class="btn btn-secondary btn-block" id="close-success-btn">Schließen</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Impressum Modal -->
+  <div class="legal-modal-overlay" id="impressum-modal">
+    <div class="legal-modal-content">
+      <button class="modal-close-btn" id="impressum-close">&times;</button>
+      <div class="legal-header">
+        <span class="eyebrow" style="color: var(--accent);">Rechtliche Informationen</span>
+        <h2>Impressum</h2>
+      </div>
+      <div class="legal-body">
+        <h3>Angaben gemäß § 5 DDG</h3>
+        <p><strong>Tonoyans Studio</strong><br>
+        Inhaberin: Nazik Tonoyan<br>
+        Stadtweg 47<br>
+        24837 Schleswig<br>
+        Deutschland</p>
+
+        <p><strong>Telefon:</strong> 0177 31 46 48 3<br>
+        <strong>E-Mail:</strong> <a href="mailto:tonoyansstudio@gmail.com">tonoyansstudio@gmail.com</a></p>
+
+        <p><strong>Umsatzsteuer-Identifikationsnummer gemäß § 27a UStG:</strong><br>
+        DE464944871</p>
+
+        <h3>Verantwortlich für den Inhalt</h3>
+        <p>Nazik Tonoyan<br>
+        Stadtweg 47<br>
+        24837 Schleswig<br>
+        Deutschland</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Datenschutz Modal -->
+  <div class="legal-modal-overlay" id="datenschutz-modal">
+    <div class="legal-modal-content">
+      <button class="modal-close-btn" id="datenschutz-close">&times;</button>
+      <div class="legal-header">
+        <span class="eyebrow" style="color: var(--accent);">Datenschutz & Privatsphäre</span>
+        <h2>Datenschutzerklärung</h2>
+      </div>
+      <div class="legal-body">
+        <h3>1. Verantwortliche Stelle</h3>
+        <p>Verantwortlich für die Verarbeitung personenbezogener Daten auf dieser Website ist:</p>
+        <p><strong>Tonoyans Studio</strong><br>
+        Inhaberin: Nazik Tonoyan<br>
+        Stadtweg 47<br>
+        24837 Schleswig<br>
+        Deutschland</p>
+        <p>Telefon: 0177 31 46 48 3<br>
+        E-Mail: <a href="mailto:tonoyansstudio@gmail.com">tonoyansstudio@gmail.com</a></p>
+
+        <h3>2. Allgemeine Hinweise</h3>
+        <p>Der Schutz deiner persönlichen Daten ist uns wichtig. Wir behandeln deine personenbezogenen Daten vertraulich und entsprechend den gesetzlichen Datenschutzvorschriften, insbesondere der Datenschutz-Grundverordnung (DSGVO).</p>
+        <p>Diese Datenschutzerklärung informiert dich darüber, welche personenbezogenen Daten beim Besuch unserer Website und bei der Nutzung unserer Online-Terminbuchung verarbeitet werden.</p>
+
+        <h3>3. Aufruf der Website</h3>
+        <p>Beim Aufrufen unserer Website können durch den technischen Betrieb der Website bestimmte Daten verarbeitet werden. Dazu können insbesondere IP-Adresse, Datum und Uhrzeit des Zugriffs, aufgerufene Seiten sowie technische Informationen zum verwendeten Endgerät und Browser gehören.</p>
+        <p>Diese Verarbeitung kann erforderlich sein, um die Website technisch bereitzustellen, die Sicherheit und Stabilität der Website zu gewährleisten und Fehler zu erkennen.</p>
+
+        <h3>4. Hosting der Website</h3>
+        <p>Unsere Website wird bei <strong>STRATO</strong> gehostet.</p>
+        <p>Beim Besuch unserer Website können durch den Hostinganbieter technische Zugriffsdaten verarbeitet werden. Hierzu können insbesondere IP-Adresse, Datum und Uhrzeit des Zugriffs sowie Informationen über das verwendete Endgerät und den Browser gehören.</p>
+        <p>Die Verarbeitung erfolgt zur technischen Bereitstellung und zum sicheren Betrieb unserer Website.</p>
+
+        <h3>5. Online-Terminbuchung</h3>
+        <p>Auf unserer Website bieten wir eine Online-Terminbuchung an.</p>
+        <p>Wenn du einen Termin buchst, werden die von dir eingegebenen Daten verarbeitet. Dazu gehören insbesondere:</p>
+        <ul>
+          <li>Name</li>
+          <li>Telefonnummer</li>
+          <li>E-Mail-Adresse</li>
+          <li>gewünschte Dienstleistung</li>
+          <li>gewünschtes Datum und gewünschte Uhrzeit</li>
+          <li>eine freiwillig eingegebene Nachricht</li>
+        </ul>
+        <p>Die Angaben werden benötigt, um deine Terminanfrage zu bearbeiten, den Termin zu organisieren und dich gegebenenfalls bezüglich des Termins zu kontaktieren.</p>
+        <p>Die Terminbuchung wird technisch über eine eigene Anwendung umgesetzt. Teile der technischen Infrastruktur werden über <strong>Vercel</strong> bereitgestellt.</p>
+        <p>Die im Rahmen der Terminbuchung eingegebenen Daten werden zur Bearbeitung der Terminanfrage an die von uns verwendete E-Mail-Adresse übermittelt und dort verarbeitet.</p>
+        <p>Wir verarbeiten die Daten nur so lange, wie dies für die Bearbeitung und Verwaltung des Termins erforderlich ist oder gesetzliche Aufbewahrungspflichten bestehen.</p>
+
+        <h3>6. Kontaktaufnahme per E-Mail</h3>
+        <p>Wenn du uns per E-Mail kontaktierst, werden die von dir übermittelten personenbezogenen Daten verarbeitet.</p>
+        <p>Dies kann insbesondere deine E-Mail-Adresse, deinen Namen sowie die von dir im Nachrichtentext mitgeteilten Informationen umfassen.</p>
+        <p>Die Verarbeitung erfolgt zur Bearbeitung und Beantwortung deiner Anfrage.</p>
+
+        <h3>7. Instagram</h3>
+        <p>Auf unserer Website werden Inhalte des sozialen Netzwerks <strong>Instagram</strong> eingebunden, insbesondere Instagram-Reels.</p>
+        <p>Instagram wird von Meta Platforms Ireland Limited, 4 Grand Canal Square, Grand Canal Harbour, Dublin 2, Irland, betrieben.</p>
+        <p>Beim Aufruf von Seiten, auf denen Instagram-Inhalte eingebunden sind, kann eine Verbindung zu den Servern von Instagram bzw. Meta hergestellt werden. Dabei können personenbezogene Daten, insbesondere Informationen über deinen Besuch unserer Website und deine IP-Adresse, an Meta übermittelt werden.</p>
+        <p>Je nach technischer Einbindung und deinen Einstellungen können dabei auch Cookies oder vergleichbare Technologien eingesetzt werden.</p>
+        <p>Weitere Informationen zur Datenverarbeitung durch Meta findest du in den Datenschutzinformationen von Instagram bzw. Meta.</p>
+
+        <h3>8. Deine Rechte</h3>
+        <p>Du hast nach Maßgabe der gesetzlichen Vorschriften insbesondere folgende Rechte:</p>
+        <ul>
+          <li>Recht auf Auskunft über deine personenbezogenen Daten</li>
+          <li>Recht auf Berichtigung unrichtiger Daten</li>
+          <li>Recht auf Löschung deiner Daten</li>
+          <li>Recht auf Einschränkung der Verarbeitung</li>
+          <li>Recht auf Datenübertragbarkeit</li>
+          <li>Recht auf Widerspruch gegen bestimmte Verarbeitungen</li>
+          <li>Recht auf Widerruf einer erteilten Einwilligung</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer dark" id="kontakt">
+    <div class="container footer-main">
+      <div>
+        <h2 class="display">Besuchen Sie uns in Schleswig.</h2>
+        <div class="footer-email">
+          <a href="mailto:tonoyansstudio@gmail.com">tonoyansstudio@gmail.com</a>
+        </div>
+      </div>
+
+      <div class="footer-info-column">
+        <div class="field">
+          <label>Adresse & Telefon</label>
+          <p><strong>TONOYANS STUDIO</strong><br>Inhaberin: Nazik Tonoyan<br>Stadtweg 47<br>24837 Schleswig, Deutschland<br>Tel: 0177 31 46 48 3</p>
+        </div>
+        <div class="field">
+          <label>Öffnungszeiten</label>
+          <p>Montag – Freitag: 08:30 – 18:00 Uhr<br>Samstag: 08:30 – 13:00 Uhr<br>Sonntag: Geschlossen</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="container footer-meta">
+      <span>&copy; 2026 TONOYANS STUDIO – Nazik Tonoyan</span>
+      <div class="socials">
+        <a href="https://www.instagram.com/tonoyans_studio/" target="_blank">Instagram ↗</a>
+        <a href="#impressum" id="btn-impressum-footer">Impressum</a>
+        <a href="#datenschutz" id="btn-datenschutz-footer">Datenschutz</a>
+      </div>
+    </div>
+
+    <div class="footer-word display">
+      <span>TONOYANS STUDIO</span>
+    </div>
+  </footer>
+
+  <script type="module" src="./main.js"></script>
+</body>
+</html>

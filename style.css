@@ -443,12 +443,15 @@ button {
   box-shadow: 0 14px 30px rgba(0,0,0,0.3);
 }
 
-.featured-img {
+.featured-img-box {
   width: 68px;
   height: 68px;
   border-radius: 8px;
-  object-fit: cover;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   flex-shrink: 0;
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .featured-text {

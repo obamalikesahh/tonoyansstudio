@@ -288,7 +288,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (featTitle) featTitle.textContent = data.title;
         if (featSubtitle) featSubtitle.textContent = data.subtitle;
         if (featImg) {
-          featImg.style.backgroundImage = `url('${data.img}')`;
+          featImg.src = data.img;
         }
 
         dots.forEach((dot, i) => {

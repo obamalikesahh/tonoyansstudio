@@ -1012,6 +1012,38 @@ button {
   gap: 24px;
 }
 
+.reel-embeds-grid {
+  align-items: start;
+}
+
+.reel-card {
+  background: transparent;
+  padding: 0;
+  min-height: auto;
+  overflow: visible;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.reel-card:hover {
+  transform: translateY(-8px);
+}
+
+.reel-card iframe, .reel-card blockquote {
+  width: 100% !important;
+  border-radius: 16px !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.12) !important;
+}
+
+@media (max-width: 1024px) {
+  .journal-grid {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+}
+
 .journal-item {
   position: relative;
   background: #111111;

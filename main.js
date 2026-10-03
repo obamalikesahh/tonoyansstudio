@@ -255,17 +255,17 @@ document.addEventListener('DOMContentLoaded', () => {
     {
       title: "BALAYAGE & AIRTOUCH",
       subtitle: "Beliebteste Meister-Behandlung • ab 150 € →",
-      img: "./Arbeit/thumb_balayage.png"
+      img: "./Arbeit/craft.png"
     },
     {
       title: "DAMEN SCHNITT & GLOW",
       subtitle: "Präzisionshaarschnitt & Styling • ab 55 € →",
-      img: "./Arbeit/thumb_cut.png"
+      img: "./Arbeit/artistry.png"
     },
     {
       title: "GLOSSING & INTENSIVPFLEGE",
       subtitle: "Seidenweicher Glanz & Veredelung • ab 45 € →",
-      img: "./Arbeit/thumb_gloss.png"
+      img: "./Arbeit/results.png"
     }
   ];
 

@@ -255,17 +255,17 @@ document.addEventListener('DOMContentLoaded', () => {
     {
       title: "BALAYAGE & AIRTOUCH",
       subtitle: "Beliebteste Meister-Behandlung • ab 150 € →",
-      img: "./Arbeit/825261306_1494108739169611_8302482309275974718_n.jpg"
+      img: "./Arbeit/craft.png"
     },
     {
       title: "DAMEN SCHNITT & GLOW",
       subtitle: "Präzisionshaarschnitt & Styling • ab 55 € →",
-      img: "./Arbeit/825310074_1396808228712906_4132944310838981144_n.jpg"
+      img: "./Arbeit/artistry.png"
     },
     {
       title: "GLOSSING & INTENSIVPFLEGE",
       subtitle: "Seidenweicher Glanz & Veredelung • ab 45 € →",
-      img: "./Arbeit/825261311_2547033662477495_252625529617833503_n.jpg"
+      img: "./Arbeit/results.png"
     }
   ];
 
@@ -287,7 +287,9 @@ document.addEventListener('DOMContentLoaded', () => {
       setTimeout(() => {
         if (featTitle) featTitle.textContent = data.title;
         if (featSubtitle) featSubtitle.textContent = data.subtitle;
-        if (featImg) featImg.src = data.img;
+        if (featImg) {
+          featImg.src = data.img;
+        }
 
         dots.forEach((dot, i) => {
           if (i === currentHeroIndex) {

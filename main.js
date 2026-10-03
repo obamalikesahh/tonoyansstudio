@@ -1,5 +1,9 @@
 // TONOYANS STUDIO — Editorial Interactive Logic & Skiper Component 16 Card Stack Scroll
 
+import imgBalayage from './Arbeit/thumb_balayage.png';
+import imgCut from './Arbeit/thumb_cut.png';
+import imgGloss from './Arbeit/thumb_gloss.png';
+
 document.addEventListener('DOMContentLoaded', () => {
 
   // 1. Preloader Fadeout
@@ -255,17 +259,17 @@ document.addEventListener('DOMContentLoaded', () => {
     {
       title: "BALAYAGE & AIRTOUCH",
       subtitle: "Beliebteste Meister-Behandlung • ab 150 € →",
-      img: "./Arbeit/craft.png"
+      img: imgBalayage
     },
     {
       title: "DAMEN SCHNITT & GLOW",
       subtitle: "Präzisionshaarschnitt & Styling • ab 55 € →",
-      img: "./Arbeit/artistry.png"
+      img: imgCut
     },
     {
       title: "GLOSSING & INTENSIVPFLEGE",
       subtitle: "Seidenweicher Glanz & Veredelung • ab 45 € →",
-      img: "./Arbeit/results.png"
+      img: imgGloss
     }
   ];
 

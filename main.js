@@ -236,6 +236,45 @@ document.addEventListener('DOMContentLoaded', () => {
   if (step2Form) {
     step2Form.addEventListener('submit', (e) => {
       e.preventDefault();
+
+      const name = document.getElementById('cust-name')?.value || 'Kunde';
+      const email = document.getElementById('cust-email')?.value || '';
+      const phone = document.getElementById('cust-phone')?.value || '';
+      const date = document.getElementById('cust-date')?.value || '';
+      const time = document.getElementById('cust-time')?.value || '';
+      const service = modalServiceTitle ? modalServiceTitle.textContent : 'Haarbehandlung';
+      const price = modalServicePrice ? modalServicePrice.textContent : '';
+
+      const newBooking = {
+        id: 'BOOK-' + Date.now(),
+        name,
+        email,
+        phone,
+        date,
+        time,
+        service,
+        price,
+        verified: true,
+        createdAt: new Date().toISOString()
+      };
+
+      const currentBookings = JSON.parse(localStorage.getItem('tonoyans_bookings') || '[]');
+      currentBookings.unshift(newBooking);
+      localStorage.setItem('tonoyans_bookings', JSON.stringify(currentBookings));
+
+      // Also register customer account
+      const currentUsers = JSON.parse(localStorage.getItem('tonoyans_users') || '[]');
+      if (!currentUsers.some(u => u.email === email)) {
+        currentUsers.push({
+          id: 'USER-' + Date.now(),
+          name,
+          email,
+          phone,
+          registeredAt: new Date().toISOString()
+        });
+        localStorage.setItem('tonoyans_users', JSON.stringify(currentUsers));
+      }
+
       step2Form.classList.add('hidden-step');
       if (successScreen) successScreen.classList.remove('hidden-step');
     });

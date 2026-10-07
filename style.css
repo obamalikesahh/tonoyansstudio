@@ -760,13 +760,12 @@ button {
 .plans {
   display: flex;
   gap: 16px;
-  align-items: stretch;
+  align-items: flex-start;
 }
 
 .plan {
   position: relative;
   flex: 1;
-  min-height: 580px;
   border: 1px solid var(--line);
   padding: 36px;
   border-radius: 18px;

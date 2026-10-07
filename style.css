@@ -888,33 +888,37 @@ button {
 }
 
 .btn-select-mini {
-  padding: 8px 14px;
+  padding: 6px 14px;
   border-radius: 999px;
-  font-size: 0.75rem;
+  font-size: 0.76rem;
   font-weight: 700;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
+  letter-spacing: 0.04em;
   background: var(--ink);
   color: #ffffff;
   white-space: nowrap;
-  transition: all 0.25s ease;
-  border: 1px solid transparent;
+  transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  cursor: pointer;
 }
 
 .dark-card .btn-select-mini {
   background: var(--acid);
   color: #111111;
+  border-color: var(--acid);
 }
 
 .btn-select-mini:hover {
-  transform: scale(1.05);
+  transform: translateY(-2px);
   background: var(--accent);
   color: #ffffff;
+  border-color: var(--accent);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .dark-card .btn-select-mini:hover {
   background: #ffffff;
   color: #111111;
+  border-color: #ffffff;
 }
 
 .plan a {

@@ -40,7 +40,8 @@ export default async function handler(req, res) {
         // upload to blob
         const blob = await put(filename, buffer, { 
           access: 'public', 
-          token: process.env.BLOB_READ_WRITE_TOKEN 
+          token: process.env.BLOB_READ_WRITE_TOKEN,
+          addRandomSuffix: true
         });
 
         // update database with the new URL

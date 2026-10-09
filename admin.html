@@ -579,6 +579,15 @@
       </div>
       <form id="email-send-form">
         <div class="form-group">
+          <label>Vorlage auswählen</label>
+          <select id="email-template-select" class="form-control" style="background: rgba(255, 255, 255, 0.05); color: #fff;">
+            <option value="custom">-- Eigene Nachricht --</option>
+            <option value="zusage">Terminzusage (Bestätigung)</option>
+            <option value="danke">Dankeschreiben (Nach dem Termin)</option>
+            <option value="storno">Termin storniert / Kündigung</option>
+          </select>
+        </div>
+        <div class="form-group">
           <label>Empfänger E-Mail</label>
           <input type="email" id="email-to-input" class="form-control" readonly />
         </div>
@@ -598,8 +607,8 @@ Herzliche Grüße,
 Nazik Tonoyan — Friseurmeisterin
 TONOYANS STUDIO Schleswig</textarea>
         </div>
-        <button type="submit" class="btn-login" style="background: var(--accent-gold);">
-          <i class="fa-solid fa-envelope"></i> E-Mail-Programm öffnen / Senden
+        <button type="submit" id="btn-submit-email" class="btn-login" style="background: var(--accent-gold);">
+          <i class="fa-solid fa-paper-plane"></i> E-Mail automatisch senden
         </button>
       </form>
     </div>
@@ -810,6 +819,40 @@ TONOYANS STUDIO Schleswig</textarea>
       const emailToInput = document.getElementById('email-to-input');
       const emailForm = document.getElementById('email-send-form');
 
+      const emailSubjectInput = document.getElementById('email-subject-input');
+      const emailBodyInput = document.getElementById('email-body-input');
+      const emailTemplateSelect = document.getElementById('email-template-select');
+      const btnSubmitEmail = document.getElementById('btn-submit-email');
+
+      const emailTemplates = {
+        custom: {
+          subject: 'Nachricht vom TONOYANS STUDIO',
+          body: ''
+        },
+        zusage: {
+          subject: 'Terminbestätigung - TONOYANS STUDIO',
+          body: 'Hallo,\n\nvielen Dank für deine Terminbuchung im TONOYANS STUDIO. Hiermit bestätigen wir deinen Termin!\n\nWir freuen uns sehr auf deinen Besuch!\n\nHerzliche Grüße,\nNazik Tonoyan — Friseurmeisterin\nTONOYANS STUDIO Schleswig'
+        },
+        danke: {
+          subject: 'Vielen Dank für deinen Besuch - TONOYANS STUDIO',
+          body: 'Hallo,\n\nvielen Dank für deinen Besuch bei uns im TONOYANS STUDIO! Wir hoffen, du bist mit deinem neuen Look zufrieden.\n\nWir würden uns sehr freuen, dich bald wieder bei uns begrüßen zu dürfen.\n\nHerzliche Grüße,\nNazik Tonoyan — Friseurmeisterin\nTONOYANS STUDIO Schleswig'
+        },
+        storno: {
+          subject: 'Terminstornierung - TONOYANS STUDIO',
+          body: 'Hallo,\n\nleider müssen wir dir mitteilen, dass dein Termin im TONOYANS STUDIO storniert wurde.\n\nBitte buche bei Gelegenheit einen neuen Termin über unsere Website.\n\nHerzliche Grüße,\nNazik Tonoyan — Friseurmeisterin\nTONOYANS STUDIO Schleswig'
+        }
+      };
+
+      if (emailTemplateSelect) {
+        emailTemplateSelect.addEventListener('change', (e) => {
+          const val = e.target.value;
+          if (emailTemplates[val]) {
+            emailSubjectInput.value = emailTemplates[val].subject;
+            emailBodyInput.value = emailTemplates[val].body;
+          }
+        });
+      }
+
       window.openEmailModal = function(email) {
         if (!email) {
           alert('Für diesen Kunden wurde keine E-Mail-Adresse angegeben.');
@@ -823,14 +866,35 @@ TONOYANS STUDIO Schleswig</textarea>
         emailModal.classList.add('hidden');
       });
 
-      emailForm.addEventListener('submit', (e) => {
+      emailForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const to = emailToInput.value;
-        const subject = encodeURIComponent(document.getElementById('email-subject-input').value);
-        const body = encodeURIComponent(document.getElementById('email-body-input').value);
+        const subject = emailSubjectInput.value;
+        const body = emailBodyInput.value;
 
-        window.location.href = `mailto:${to}?subject=${subject}&body=${body}`;
-        emailModal.classList.add('hidden');
+        btnSubmitEmail.disabled = true;
+        btnSubmitEmail.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Senden...';
+
+        try {
+          const res = await fetch('/api/admin-send-email', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ to, subject, body })
+          });
+          
+          if (res.ok) {
+            alert('E-Mail erfolgreich gesendet!');
+            emailModal.classList.add('hidden');
+          } else {
+            alert('Fehler beim Senden der E-Mail.');
+          }
+        } catch (error) {
+          console.error(error);
+          alert('Ein Fehler ist aufgetreten beim Senden.');
+        } finally {
+          btnSubmitEmail.disabled = false;
+          btnSubmitEmail.innerHTML = '<i class="fa-solid fa-paper-plane"></i> E-Mail automatisch senden';
+        }
       });
 
     });

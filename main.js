@@ -394,10 +394,6 @@ document.addEventListener('DOMContentLoaded', () => {
   if (closeSuccessBtn && bookingModal) {
     closeSuccessBtn.addEventListener('click', () => {
       bookingModal.classList.remove('active');
-      const loggedEmail = localStorage.getItem('tonoyans_customer_logged_in_email');
-      if (loggedEmail) {
-        openCustomerPortal();
-      }
     });
   }
 

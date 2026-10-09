@@ -46,17 +46,19 @@
       <a href="#kontakt">Kontakt</a>
     </nav>
 
-    <a href="#preisliste" class="label">
-      <span class="label-2">Ein Termin buchen</span>
-      <span class="label-3">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 11" aria-hidden="true" focusable="false" width="14" height="11" class="icon">
-          <path d="M0.5 5.36L13.46 5.36M8.6 10.22L13.46 5.36L8.6 0.5" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="wrapper"></path>
-        </svg>
-      </span>
-    </a>
-    <a href="#" class="label hidden" id="btn-customer-portal" style="margin-left: 10px; background: #cbac63; color: #000; border-color: #cbac63;">
-      <span class="label-2"><i class="fa-solid fa-user"></i> Mein Konto</span>
-    </a>
+    <div style="display: flex; gap: 10px; justify-self: end; align-items: center;">
+      <a href="#preisliste" class="label">
+        <span class="label-2">Ein Termin buchen</span>
+        <span class="label-3">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 11" aria-hidden="true" focusable="false" width="14" height="11" class="icon">
+            <path d="M0.5 5.36L13.46 5.36M8.6 10.22L13.46 5.36L8.6 0.5" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="wrapper"></path>
+          </svg>
+        </span>
+      </a>
+      <a href="#" class="label hidden" id="btn-customer-portal" style="background: #cbac63; color: #000; border-color: #cbac63;">
+        <span class="label-2"><i class="fa-solid fa-user"></i> Mein Konto</span>
+      </a>
+    </div>
 
     <button class="mobile-toggle-btn" id="mobile-toggle" aria-label="Menü öffnen">
       <i class="fa-solid fa-bars"></i>
@@ -68,7 +70,7 @@
     <!-- Hero Section (Framer Salonix Look & Feel tailored to TONOYANS STUDIO) -->
     <section class="hero section">
       <div class="hero-media">
-        <img src="./Salon/hero_work.png" alt="Friseurmeisterin Nazik Tonoyan bei der Arbeit im TONOYANS STUDIO" class="hero-bg-img" />
+        <img src="./Salon/hero_work.png" alt="Friseurmeisterin Nazik Tonoyan bei der Arbeit im TONOYANS STUDIO" class="hero-bg-img" data-setting-img="img_hero_bg" />
         <div class="hero-overlay-dark"></div>
       </div>
 
@@ -142,7 +144,7 @@
         <div class="skiper35-expand-container framer-banner-grid-skiper">
           <div class="expand-card active">
             <div class="expand-card-bg">
-              <img src="./Arbeit/craft.png" alt="CRAFT - Hair Wash & Care" />
+              <img src="./Arbeit/craft.png" data-setting-img="img_framer_craft" alt="CRAFT - Hair Wash & Care" />
             </div>
             <div class="expand-card-vertical-title">
               <span>01 / PREPARATION</span>
@@ -157,7 +159,7 @@
 
           <div class="expand-card">
             <div class="expand-card-bg">
-              <img src="./Salon/DSC03348.JPG" alt="STUDIO - Salon Interior" />
+              <img src="./Salon/DSC03348.JPG" data-setting-img="img_framer_studio" alt="STUDIO - Salon Interior" />
             </div>
             <div class="expand-card-vertical-title">
               <span>02 / ATMOSPHERE</span>
@@ -172,7 +174,7 @@
 
           <div class="expand-card">
             <div class="expand-card-bg">
-              <img src="./Arbeit/825310074_1396808228712906_4132944310838981144_n.jpg" alt="ARTISTRY - Balayage Meisterhandwerk" />
+              <img src="./Arbeit/825310074_1396808228712906_4132944310838981144_n.jpg" data-setting-img="img_framer_artistry" alt="ARTISTRY - Balayage Meisterhandwerk" />
             </div>
             <div class="expand-card-vertical-title">
               <span>03 / COLOR & STYLE</span>
@@ -187,7 +189,7 @@
 
           <div class="expand-card">
             <div class="expand-card-bg">
-              <img src="./Arbeit/results.png" alt="RESULTS - Shine & Perfection" />
+              <img src="./Arbeit/results.png" data-setting-img="img_framer_results" alt="RESULTS - Shine & Perfection" />
             </div>
             <div class="expand-card-vertical-title">
               <span>04 / SHINE & FINISH</span>
@@ -219,7 +221,7 @@
 
       <div class="container grid12 intro-lower">
         <div class="intro-portrait">
-          <img src="./Ich/Nazik.jpg" alt="Friseurmeisterin Nazik Tonoyan bei der Arbeit im TONOYANS STUDIO">
+          <img src="./Ich/Nazik.jpg" data-setting-img="img_intro_portrait" alt="Friseurmeisterin Nazik Tonoyan bei der Arbeit im TONOYANS STUDIO">
         </div>
         
         <div class="keywords">
@@ -363,35 +365,35 @@
                   <strong>Kurz (Waschen / Schneiden / Style)</strong>
                   <small>45 Min.</small>
                 </div>
-                <button class="btn-select-mini booking-btn" data-service="Damen Kurz" data-price="55 €">55 €</button>
+                <button class="btn-select-mini booking-btn" data-service="Damen Kurz" data-price="55 €" data-setting-price="price_damen_kurz">55 €</button>
               </div>
               <div class="plan-item-row">
                 <div class="item-text">
                   <strong>Mittel (Waschen / Schneiden / Style)</strong>
                   <small>45 Min.</small>
                 </div>
-                <button class="btn-select-mini booking-btn" data-service="Damen Mittel" data-price="ab 57 €">ab 57 €</button>
+                <button class="btn-select-mini booking-btn" data-service="Damen Mittel" data-price="ab 57 €" data-setting-price="price_damen_mittel">ab 57 €</button>
               </div>
               <div class="plan-item-row">
                 <div class="item-text">
                   <strong>Lang (Waschen / Schneiden / Style)</strong>
                   <small>60 Min.</small>
                 </div>
-                <button class="btn-select-mini booking-btn" data-service="Damen Lang" data-price="ab 60 €">ab 60 €</button>
+                <button class="btn-select-mini booking-btn" data-service="Damen Lang" data-price="ab 60 €" data-setting-price="price_damen_lang">ab 60 €</button>
               </div>
               <div class="plan-item-row">
                 <div class="item-text">
                   <strong>Trockenschnitt Damen</strong>
                   <small>30–45 Min.</small>
                 </div>
-                <button class="btn-select-mini booking-btn" data-service="Trockenschnitt Damen" data-price="ab 40 €">ab 40 €</button>
+                <button class="btn-select-mini booking-btn" data-service="Trockenschnitt Damen" data-price="ab 40 €" data-setting-price="price_damen_trocken">ab 40 €</button>
               </div>
               <div class="plan-item-row">
                 <div class="item-text">
                   <strong>Styling (Waschen & Stylen)</strong>
                   <small>45 Min.</small>
                 </div>
-                <button class="btn-select-mini booking-btn" data-service="Waschen & Stylen" data-price="ab 40 €">ab 40 €</button>
+                <button class="btn-select-mini booking-btn" data-service="Waschen & Stylen" data-price="ab 40 €" data-setting-price="price_damen_styling">ab 40 €</button>
               </div>
 
               <!-- Coloration & Highlights -->
@@ -401,35 +403,35 @@
                   <strong>Ansatzfärbung (bis 2 cm)</strong>
                   <small>60 Min. • zzgl. Styling</small>
                 </div>
-                <button class="btn-select-mini booking-btn" data-service="Ansatzfärbung" data-price="ab 50 €">ab 50 €</button>
+                <button class="btn-select-mini booking-btn" data-service="Ansatzfärbung" data-price="ab 50 €" data-setting-price="price_farbe_ansatz">ab 50 €</button>
               </div>
               <div class="plan-item-row">
                 <div class="item-text">
                   <strong>Tönung / Glossing</strong>
                   <small>60 Min. • zzgl. Styling</small>
                 </div>
-                <button class="btn-select-mini booking-btn" data-service="Tönung / Glossing" data-price="ab 50 €">ab 50 €</button>
+                <button class="btn-select-mini booking-btn" data-service="Tönung / Glossing" data-price="ab 50 €" data-setting-price="price_farbe_glossing">ab 50 €</button>
               </div>
               <div class="plan-item-row">
                 <div class="item-text">
                   <strong>Komplettfärbung (Kurz / Mittel / Lang)</strong>
                   <small>30–60 Min. • zzgl. Styling</small>
                 </div>
-                <button class="btn-select-mini booking-btn" data-service="Komplettfärbung" data-price="ab 55 €">ab 55 €</button>
+                <button class="btn-select-mini booking-btn" data-service="Komplettfärbung" data-price="ab 55 €" data-setting-price="price_farbe_komplett">ab 55 €</button>
               </div>
               <div class="plan-item-row">
                 <div class="item-text">
                   <strong>Strähnen inkl. Glossing</strong>
                   <small>ca. 2,5–3 Std.</small>
                 </div>
-                <button class="btn-select-mini booking-btn" data-service="Strähnen inkl. Glossing" data-price="ab 150 €">ab 150 €</button>
+                <button class="btn-select-mini booking-btn" data-service="Strähnen inkl. Glossing" data-price="ab 150 €" data-setting-price="price_farbe_straehnen">ab 150 €</button>
               </div>
               <div class="plan-item-row">
                 <div class="item-text">
                   <strong>Balayage / AirTouch</strong>
                   <small>ca. 2,5–3 Std.</small>
                 </div>
-                <button class="btn-select-mini booking-btn" data-service="Balayage / AirTouch" data-price="ab 150 €">ab 150 €</button>
+                <button class="btn-select-mini booking-btn" data-service="Balayage / AirTouch" data-price="ab 150 €" data-setting-price="price_farbe_balayage">ab 150 €</button>
               </div>
 
             </div>
@@ -447,7 +449,7 @@
                   <strong>Haarschnitt trocken</strong>
                   <small>Präzisionsschnitt • 30 Min.</small>
                 </div>
-                <button class="btn-select-mini booking-btn" data-service="Herren Haarschnitt trocken" data-price="28 €">28 €</button>
+                <button class="btn-select-mini booking-btn" data-service="Herren Haarschnitt trocken" data-price="28 €" data-setting-price="price_herren_trocken">28 €</button>
               </div>
 
               <div class="plan-item-row">
@@ -455,7 +457,7 @@
                   <strong>Waschen / Schneiden / Styling</strong>
                   <small>Kopfwäsche & Styling • 45 Min.</small>
                 </div>
-                <button class="btn-select-mini booking-btn" data-service="Herren Waschen / Schneiden / Styling" data-price="35 €">35 €</button>
+                <button class="btn-select-mini booking-btn" data-service="Herren Waschen / Schneiden / Styling" data-price="35 €" data-setting-price="price_herren_waschen_schneiden">35 €</button>
               </div>
 
             </div>
@@ -474,14 +476,14 @@
                   <strong>Intensive Pflege</strong>
                   <small>Tiefenmaske • 30 Min.</small>
                 </div>
-                <button class="btn-select-mini booking-btn" data-service="Intensive Pflege" data-price="25 €">25 €</button>
+                <button class="btn-select-mini booking-btn" data-service="Intensive Pflege" data-price="25 €" data-setting-price="price_extra_pflege">25 €</button>
               </div>
               <div class="plan-item-row">
                 <div class="item-text">
                   <strong>Kopfhautmassage mit Lotion / Wasser</strong>
                   <small>Entspannung & Entlastung • 15 Min.</small>
                 </div>
-                <button class="btn-select-mini booking-btn" data-service="Kopfhautmassage" data-price="15 €">15 €</button>
+                <button class="btn-select-mini booking-btn" data-service="Kopfhautmassage" data-price="15 €" data-setting-price="price_extra_kopfhaut">15 €</button>
               </div>
 
               <div class="service-subheading" style="color: rgba(255,255,255,0.6);">Kinder</div>
@@ -490,7 +492,7 @@
                   <strong>Kinderhaarschnitt</strong>
                   <small>Für Kinder bis 12 Jahre • 30 Min.</small>
                 </div>
-                <button class="btn-select-mini booking-btn" data-service="Kinderhaarschnitt" data-price="20 €">20 €</button>
+                <button class="btn-select-mini booking-btn" data-service="Kinderhaarschnitt" data-price="20 €" data-setting-price="price_extra_kinder">20 €</button>
               </div>
 
               <div class="service-subheading" style="color: rgba(255,255,255,0.6);">Augenbrauen & Wimpern</div>
@@ -499,14 +501,14 @@
                   <strong>Augenbrauen zupfen / färben</strong>
                   <small>Form & Farbe • 15 Min.</small>
                 </div>
-                <button class="btn-select-mini booking-btn" data-service="Augenbrauen zupfen / färben" data-price="10 €">10 €</button>
+                <button class="btn-select-mini booking-btn" data-service="Augenbrauen zupfen / färben" data-price="10 €" data-setting-price="price_extra_augenbrauen">10 €</button>
               </div>
               <div class="plan-item-row">
                 <div class="item-text">
                   <strong>Wimpern färben</strong>
                   <small>Intensiver Blick • 20 Min.</small>
                 </div>
-                <button class="btn-select-mini booking-btn" data-service="Wimpern färben" data-price="15 €">15 €</button>
+                <button class="btn-select-mini booking-btn" data-service="Wimpern färben" data-price="15 €" data-setting-price="price_extra_wimpern">15 €</button>
               </div>
 
             </div>
@@ -993,5 +995,35 @@
     <i class="fa-solid fa-arrow-up"></i>
   </a>
   <script type="module" src="./main.js"></script>
+
+  <script>
+    async function applyLiveSettings() {
+      try {
+        const res = await fetch('/api/settings');
+        const data = await res.json();
+        
+        // Update images
+        document.querySelectorAll('[data-setting-img]').forEach(el => {
+          const key = el.getAttribute('data-setting-img');
+          if (data[key] && data[key].value) {
+            el.src = data[key].value;
+          }
+        });
+
+        // Update prices
+        document.querySelectorAll('[data-setting-price]').forEach(el => {
+          const key = el.getAttribute('data-setting-price');
+          if (data[key] && data[key].value) {
+            el.textContent = data[key].value;
+            el.setAttribute('data-price', data[key].value);
+          }
+        });
+      } catch (e) {
+        console.error('Failed to load settings', e);
+      }
+    }
+    applyLiveSettings();
+  </script>
 </body>
+
 </html>

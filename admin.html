@@ -516,6 +516,9 @@
         <button class="tab-btn" data-tab="users">
           <i class="fa-solid fa-users"></i> Registrierte Kunden & SMS-Verifizierungen
         </button>
+        <button class="tab-btn" data-tab="settings">
+          <i class="fa-solid fa-sliders"></i> Website Inhalte (Bilder & Preise)
+        </button>
       </div>
 
       <!-- Bookings Table -->
@@ -564,6 +567,16 @@
               <!-- Rendered dynamically -->
             </tbody>
           </table>
+        </div>
+      </div>
+
+      <!-- Settings Tab -->
+      <div class="data-card hidden" id="tab-content-settings" style="padding: 24px;">
+        <div class="table-header" style="border:none; padding:0 0 20px 0;">
+          <h3>Website Inhalte Live bearbeiten</h3>
+        </div>
+        <div id="settings-container">
+          <p style="color: var(--text-muted);"><i class="fa-solid fa-spinner fa-spin"></i> Lade Einstellungen...</p>
         </div>
       </div>
 
@@ -735,16 +748,121 @@ TONOYANS STUDIO Schleswig</textarea>
             btn.classList.add('active');
 
             const tab = btn.getAttribute('data-tab');
-            if (tab === 'bookings') {
-              document.getElementById('tab-content-bookings').classList.remove('hidden');
-              document.getElementById('tab-content-users').classList.add('hidden');
-            } else {
-              document.getElementById('tab-content-bookings').classList.add('hidden');
-              document.getElementById('tab-content-users').classList.remove('hidden');
+            document.getElementById('tab-content-bookings').classList.add('hidden');
+            document.getElementById('tab-content-users').classList.add('hidden');
+            document.getElementById('tab-content-settings').classList.add('hidden');
+            
+            document.getElementById('tab-content-' + tab).classList.remove('hidden');
+
+            if (tab === 'settings') {
+              loadSettings();
             }
           });
         });
       }
+
+      async function loadSettings() {
+        const container = document.getElementById('settings-container');
+        try {
+          const res = await fetch('/api/settings');
+          const data = await res.json();
+          
+          let html = '<div style="display: grid; gap: 30px;">';
+          
+          // Images
+          html += '<div><h4 style="margin-bottom: 15px; color: var(--accent-gold); border-bottom: 1px solid var(--card-border); padding-bottom: 5px;">Bilder</h4>';
+          html += '<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px;">';
+          for (const key in data) {
+            if (data[key].type === 'image') {
+              html += `
+                <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--card-border); padding: 15px; border-radius: 8px;">
+                  <label style="display:block; font-size:0.8rem; margin-bottom:8px; color: var(--text-muted);">${data[key].label}</label>
+                  <img src="${data[key].value}" style="width: 100%; height: 120px; object-fit: cover; border-radius: 4px; margin-bottom: 10px; background: #000;" id="img-preview-${key}" />
+                  <input type="file" accept="image/*" class="form-control" style="font-size: 0.8rem; padding: 8px;" onchange="uploadImage(this, '${key}')" />
+                </div>
+              `;
+            }
+          }
+          html += '</div></div>';
+
+          // Prices
+          html += '<div><h4 style="margin-bottom: 15px; color: var(--accent-gold); border-bottom: 1px solid var(--card-border); padding-bottom: 5px;">Preise</h4>';
+          html += '<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 15px;">';
+          for (const key in data) {
+            if (data[key].type === 'price') {
+              html += `
+                <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--card-border); padding: 10px; border-radius: 8px;">
+                  <label style="display:block; font-size:0.75rem; margin-bottom:5px; color: var(--text-muted);">${data[key].label}</label>
+                  <div style="display:flex; gap:10px;">
+                    <input type="text" value="${data[key].value}" id="price-input-${key}" class="form-control" style="font-size: 0.85rem; padding: 6px;" />
+                    <button class="btn-action-email" style="padding: 6px 12px; margin: 0;" onclick="savePrice('${key}')"><i class="fa-solid fa-save"></i></button>
+                  </div>
+                </div>
+              `;
+            }
+          }
+          html += '</div></div>';
+
+          html += '</div>';
+          container.innerHTML = html;
+
+        } catch(e) {
+          container.innerHTML = '<p style="color: red;">Fehler beim Laden der Einstellungen: ' + e.message + '</p>';
+        }
+      }
+
+      window.savePrice = async function(key) {
+        const value = document.getElementById('price-input-' + key).value;
+        try {
+          const res = await fetch('/api/settings', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ action: 'update_price', key, value })
+          });
+          if (res.ok) alert('Preis erfolgreich aktualisiert!');
+        } catch(e) {
+          alert('Fehler: ' + e.message);
+        }
+      };
+
+      window.uploadImage = async function(input, key) {
+        const file = input.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = async function(e) {
+          const base64Data = e.target.result;
+          
+          input.disabled = true;
+          input.style.opacity = '0.5';
+          
+          try {
+            const res = await fetch('/api/settings', {
+              method: 'POST',
+              headers: {'Content-Type': 'application/json'},
+              body: JSON.stringify({ 
+                action: 'upload_image', 
+                key, 
+                data: base64Data, 
+                filename: file.name 
+              })
+            });
+            const result = await res.json();
+            if (result.success) {
+              document.getElementById('img-preview-' + key).src = result.url;
+              alert('Bild erfolgreich aktualisiert!');
+            } else {
+              alert('Fehler: ' + result.error);
+            }
+          } catch(err) {
+            alert('Upload Fehler: ' + err.message);
+          } finally {
+            input.disabled = false;
+            input.style.opacity = '1';
+          }
+        };
+        reader.readAsDataURL(file);
+      };
 
       function renderData() {
         const bookings = JSON.parse(localStorage.getItem('tonoyans_bookings') || '[]');

@@ -1005,7 +1005,7 @@
         // Update images
         document.querySelectorAll('[data-setting-img]').forEach(el => {
           const key = el.getAttribute('data-setting-img');
-          if (data[key] && data[key].value) {
+          if (data[key] && data[key].value && data[key].value.startsWith('http')) {
             el.src = data[key].value;
           }
         });

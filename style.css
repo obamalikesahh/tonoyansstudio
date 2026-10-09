@@ -763,6 +763,13 @@ button {
   align-items: flex-start;
 }
 
+.plan-col {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  flex: 1;
+}
+
 .plan {
   position: relative;
   flex: 1;

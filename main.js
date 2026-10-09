@@ -163,7 +163,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const step1Form = document.getElementById('booking-form-step1');
   const step2Form = document.getElementById('booking-form-step2');
   const successScreen = document.getElementById('booking-success');
-  const sentPhoneDisplay = document.getElementById('sent-phone-display');
+  const sentEmailDisplay = document.getElementById('sent-email-display');
   const backToStep1Btn = document.getElementById('back-to-step1');
   const closeSuccessBtn = document.getElementById('close-success-btn');
 
@@ -204,10 +204,10 @@ document.addEventListener('DOMContentLoaded', () => {
   if (step1Form) {
     step1Form.addEventListener('submit', (e) => {
       e.preventDefault();
-      const phoneInput = document.getElementById('cust-phone');
-      const phoneVal = phoneInput ? phoneInput.value : '';
+      const emailInput = document.getElementById('cust-email');
+      const emailVal = emailInput ? emailInput.value : '';
 
-      if (sentPhoneDisplay) sentPhoneDisplay.textContent = phoneVal;
+      if (sentEmailDisplay) sentEmailDisplay.textContent = emailVal;
 
       step1Form.classList.add('hidden-step');
       if (step2Form) step2Form.classList.remove('hidden-step');

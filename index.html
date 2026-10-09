@@ -346,12 +346,13 @@
         <h2 class="section-title display">Wähle deine Behandlung</h2>
 
         <div class="plans">
-
-          <!-- 01 / Damen -->
-          <div class="plan">
-            <small>01 / Damen</small>
-            <h3>Damen</h3>
-            <div class="price">ab 40 €</div>
+          <!-- Spalte 1 -->
+          <div class="plan-col">
+            <!-- 01 / Damen -->
+            <div class="plan">
+              <small>01 / Damen</small>
+              <h3>Damen</h3>
+              <div class="price">ab 40 €</div>
             <div class="plan-interactive-items">
 
               <!-- Schnitt & Styling -->
@@ -432,11 +433,14 @@
 
             </div>
           </div>
+          </div> <!-- End Spalte 1 -->
 
-          <!-- 02 / Herren -->
-          <div class="plan">
-            <small>02 / Herren</small>
-            <h3>Herren</h3>
+          <!-- Spalte 2 -->
+          <div class="plan-col">
+            <!-- 02 / Herren -->
+            <div class="plan">
+              <small>02 / Herren</small>
+              <h3>Herren</h3>
             <div class="price">ab 28 €</div>
             <div class="plan-interactive-items">
 
@@ -510,6 +514,7 @@
 
             </div>
           </div>
+          </div> <!-- End Spalte 2 -->
 
         </div>
       </div>
@@ -713,7 +718,7 @@
 
   </main>
 
-  <!-- Interactive Booking Modal mit SMS-Verifizierung -->
+  <!-- Interactive Booking Modal mit E-Mail-Verifizierung -->
   <div class="booking-modal-overlay" id="booking-modal">
     <div class="booking-modal-content">
       <button class="modal-close-btn" id="modal-close">&times;</button>
@@ -721,7 +726,7 @@
       <div class="modal-header">
         <i class="fa-solid fa-shield-halved"></i>
         <h3>Termin reservieren</h3>
-        <p>TONOYANS STUDIO • SMS-Verifikation</p>
+        <p>TONOYANS STUDIO • E-Mail-Verifikation</p>
       </div>
 
       <div class="selected-service-banner">
@@ -747,7 +752,7 @@
 
         <div class="form-row">
           <div class="form-group">
-            <label>Handynummer (für SMS-Code) *</label>
+            <label>Handynummer *</label>
             <input type="tel" id="cust-phone" required placeholder="z. B. +49 176 12345678" />
           </div>
         </div>
@@ -771,17 +776,18 @@
         </div>
 
         <button type="submit" class="btn btn-primary btn-block btn-lg">
-          <i class="fa-solid fa-paper-plane"></i> SMS-Code anfordern
+          <i class="fa-solid fa-paper-plane"></i> E-Mail-Code anfordern
         </button>
       </form>
 
       <!-- Step 2: Code -->
       <form class="modal-form hidden-step" id="booking-form-step2">
         <div class="sms-notice-box">
-          <i class="fa-solid fa-mobile-screen-button"></i>
+          <i class="fa-solid fa-envelope"></i>
           <div>
-            <strong>SMS-Code gesendet!</strong>
-            <p>Wir haben einen 4-stelligen Verifizierungscode an <span id="sent-phone-display">+49 176 ...</span> gesendet.</p>
+            <strong>E-Mail mit Code gesendet!</strong>
+            <p>Ihr 4-stelliger Verifizierungscode lautet: <b id="demo-sms-code-display" style="font-size: 1.1rem; color: var(--accent); letter-spacing: 0.15em;">1234</b></p>
+            <small style="opacity:0.8;">Gesendet an <span id="sent-email-display">anna@beispiel.de</span></small>
           </div>
         </div>
 

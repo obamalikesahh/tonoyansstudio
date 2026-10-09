@@ -1920,9 +1920,5 @@ button {
   }
 }
 
-
-
-. h i d d e n   {   d i s p l a y :   n o n e   ! i m p o r t a n t ;   } 
-
 .hidden { display: none !important; }
 #email-template-select option { background: #1a1a1a; color: #fff; }

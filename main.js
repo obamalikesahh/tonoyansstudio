@@ -202,12 +202,27 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   if (step1Form) {
-    step1Form.addEventListener('submit', (e) => {
+    step1Form.addEventListener('submit', async (e) => {
       e.preventDefault();
       const emailInput = document.getElementById('cust-email');
+      const nameInput = document.getElementById('cust-name');
       const emailVal = emailInput ? emailInput.value : '';
+      const nameVal = nameInput ? nameInput.value : '';
 
       if (sentEmailDisplay) sentEmailDisplay.textContent = emailVal;
+
+      const generatedCode = Math.floor(1000 + Math.random() * 9000).toString();
+      window.currentVerificationCode = generatedCode;
+
+      try {
+        await fetch('/api/send-code', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: emailVal, name: nameVal, code: generatedCode })
+        });
+      } catch (err) {
+        console.error('Error sending code:', err);
+      }
 
       step1Form.classList.add('hidden-step');
       if (step2Form) step2Form.classList.remove('hidden-step');
@@ -234,8 +249,15 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   if (step2Form) {
-    step2Form.addEventListener('submit', (e) => {
+    step2Form.addEventListener('submit', async (e) => {
       e.preventDefault();
+
+      const inputs = document.querySelectorAll('.code-digit');
+      const enteredCode = Array.from(inputs).map(i => i.value).join('');
+      if (window.currentVerificationCode && enteredCode !== window.currentVerificationCode) {
+        alert('Falscher Code. Bitte überprüfen Sie Ihre E-Mail.');
+        return;
+      }
 
       const name = document.getElementById('cust-name')?.value || 'Kunde';
       const email = document.getElementById('cust-email')?.value || '';
@@ -244,6 +266,16 @@ document.addEventListener('DOMContentLoaded', () => {
       const time = document.getElementById('cust-time')?.value || '';
       const service = modalServiceTitle ? modalServiceTitle.textContent : 'Haarbehandlung';
       const price = modalServicePrice ? modalServicePrice.textContent : '';
+
+      try {
+        await fetch('/api/send-booking', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email, phone, date, time, service })
+        });
+      } catch (err) {
+        console.error('Error sending booking to admin:', err);
+      }
 
       const newBooking = {
         id: 'BOOK-' + Date.now(),

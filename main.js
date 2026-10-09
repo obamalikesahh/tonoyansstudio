@@ -230,9 +230,21 @@ document.addEventListener('DOMContentLoaded', () => {
       // Check request limits (Max 3 bookings per session)
       let reqCount = parseInt(sessionStorage.getItem('tonoyans_booking_req_count') || '0', 10);
       if (reqCount >= 3) {
-        alert('Bot-Schutz: Zu viele Buchungsanfragen. Bitte versuchen Sie es später erneut.');
+        alert('Bot-Schutz: Zu viele Buchungsanfragen in dieser Sitzung. Bitte versuchen Sie es später erneut.');
         return;
       }
+
+      // Hourly limit (max 5 per hour per device)
+      let hourlyBookings = JSON.parse(localStorage.getItem('tonoyans_hourly_bookings') || '[]');
+      const now = Date.now();
+      hourlyBookings = hourlyBookings.filter(ts => now - ts < 3600000); // keep only last 60 mins
+      if (hourlyBookings.length >= 5) {
+        localStorage.setItem('tonoyans_hourly_bookings', JSON.stringify(hourlyBookings));
+        alert('Bot-Schutz: Stündliches Buchungslimit erreicht. Bitte warten Sie eine Weile, bevor Sie weitere Termine anfragen.');
+        return;
+      }
+      hourlyBookings.push(now);
+      localStorage.setItem('tonoyans_hourly_bookings', JSON.stringify(hourlyBookings));
 
       const emailInput = document.getElementById('cust-email');
       const nameInput = document.getElementById('cust-name');

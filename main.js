@@ -167,12 +167,27 @@ document.addEventListener('DOMContentLoaded', () => {
   const backToStep1Btn = document.getElementById('back-to-step1');
   const closeSuccessBtn = document.getElementById('close-success-btn');
 
+  let currentCaptchaText = '';
+  function generateCaptcha() {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let code = '';
+    for (let i = 0; i < 5; i++) {
+      code += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    currentCaptchaText = code;
+    const display = document.getElementById('captcha-display');
+    if (display) display.textContent = code;
+    const input = document.getElementById('cust-captcha');
+    if (input) input.value = '';
+  }
+
   function resetModalState() {
     if (step1Form) step1Form.classList.remove('hidden-step');
     if (step2Form) step2Form.classList.add('hidden-step');
     if (successScreen) successScreen.classList.add('hidden-step');
     if (step1Form) step1Form.reset();
     if (step2Form) step2Form.reset();
+    generateCaptcha();
   }
 
   bookingBtns.forEach(btn => {
@@ -204,15 +219,51 @@ document.addEventListener('DOMContentLoaded', () => {
   if (step1Form) {
     step1Form.addEventListener('submit', async (e) => {
       e.preventDefault();
+      
+      const captchaInput = document.getElementById('cust-captcha');
+      if (captchaInput && captchaInput.value.toUpperCase() !== currentCaptchaText) {
+        alert('Bot-Schutz: Der eingegebene Code ist falsch!');
+        generateCaptcha();
+        return;
+      }
+
+      // Check request limits (Max 3 bookings per session)
+      let reqCount = parseInt(sessionStorage.getItem('tonoyans_booking_req_count') || '0', 10);
+      if (reqCount >= 3) {
+        alert('Bot-Schutz: Zu viele Buchungsanfragen. Bitte versuchen Sie es später erneut.');
+        return;
+      }
+
       const emailInput = document.getElementById('cust-email');
       const nameInput = document.getElementById('cust-name');
+      const dateInput = document.getElementById('cust-date');
+      const timeInput = document.getElementById('cust-time');
+      
       const emailVal = emailInput ? emailInput.value : '';
       const nameVal = nameInput ? nameInput.value : '';
+      const dateVal = dateInput ? dateInput.value : '';
+      const timeVal = timeInput ? timeInput.value : '';
+
+      // Check Double Booking
+      const allBookings = JSON.parse(localStorage.getItem('tonoyans_bookings') || '[]');
+      const isBooked = allBookings.some(b => b.date === dateVal && b.time === timeVal);
+      if (isBooked) {
+        alert(`Leider ist am ${dateVal} um ${timeVal} Uhr bereits ein Termin vergeben. Bitte wähle eine andere Uhrzeit.`);
+        return;
+      }
+
+      sessionStorage.setItem('tonoyans_booking_req_count', reqCount + 1);
 
       if (sentEmailDisplay) sentEmailDisplay.textContent = emailVal;
 
       const generatedCode = Math.floor(1000 + Math.random() * 9000).toString();
       window.currentVerificationCode = generatedCode;
+      
+      const btnRequestCode = document.getElementById('btn-request-code');
+      if (btnRequestCode) {
+        btnRequestCode.disabled = true;
+        btnRequestCode.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Senden...';
+      }
 
       try {
         await fetch('/api/send-code', {
@@ -222,6 +273,11 @@ document.addEventListener('DOMContentLoaded', () => {
         });
       } catch (err) {
         console.error('Error sending code:', err);
+      } finally {
+        if (btnRequestCode) {
+          btnRequestCode.disabled = false;
+          btnRequestCode.innerHTML = '<i class="fa-solid fa-paper-plane"></i> E-Mail-Code anfordern';
+        }
       }
 
       step1Form.classList.add('hidden-step');

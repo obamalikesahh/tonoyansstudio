@@ -774,11 +774,17 @@ TONOYANS STUDIO Schleswig</textarea>
           html += '<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px;">';
           for (const key in data) {
             if (data[key].type === 'image') {
+              const isCustom = data[key].value && data[key].value.startsWith('http');
+              const imgSrc = isCustom ? data[key].value : 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 100 100"><rect fill="%23222" width="100" height="100"/><text fill="%23888" x="50" y="50" font-family="sans-serif" font-size="12" text-anchor="middle" alignment-baseline="middle">Originalbild aktiv</text></svg>';
+              
               html += `
                 <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--card-border); padding: 15px; border-radius: 8px;">
                   <label style="display:block; font-size:0.8rem; margin-bottom:8px; color: var(--text-muted);">${data[key].label}</label>
-                  <img src="${data[key].value}" style="width: 100%; height: 120px; object-fit: cover; border-radius: 4px; margin-bottom: 10px; background: #000;" id="img-preview-${key}" />
-                  <input type="file" accept="image/*" class="form-control" style="font-size: 0.8rem; padding: 8px;" onchange="uploadImage(this, '${key}')" />
+                  <img src="${imgSrc}" style="width: 100%; height: 120px; object-fit: cover; border-radius: 4px; margin-bottom: 10px; background: #000;" id="img-preview-${key}" />
+                  <div style="display:flex; gap:10px; align-items:center;">
+                    <input type="file" accept="image/*" class="form-control" style="font-size: 0.8rem; padding: 8px; flex-grow:1;" onchange="uploadImage(this, '${key}')" />
+                    <button class="btn-delete" style="padding:8px 12px; margin:0;" onclick="resetImage('${key}')" title="Auf Originalbild zurücksetzen"><i class="fa-solid fa-rotate-left"></i></button>
+                  </div>
                 </div>
               `;
             }
@@ -820,6 +826,23 @@ TONOYANS STUDIO Schleswig</textarea>
             body: JSON.stringify({ action: 'update_price', key, value })
           });
           if (res.ok) alert('Preis erfolgreich aktualisiert!');
+        } catch(e) {
+          alert('Fehler: ' + e.message);
+        }
+      };
+
+      window.resetImage = async function(key) {
+        if (!confirm('Soll dieses Bild wirklich auf das Originalbild zurückgesetzt werden?')) return;
+        try {
+          const res = await fetch('/api/settings', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ action: 'reset_image', key })
+          });
+          if (res.ok) {
+            document.getElementById('img-preview-' + key).src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 100 100"><rect fill="%23222" width="100" height="100"/><text fill="%23888" x="50" y="50" font-family="sans-serif" font-size="12" text-anchor="middle" alignment-baseline="middle">Originalbild aktiv</text></svg>';
+            alert('Bild erfolgreich zurückgesetzt!');
+          }
         } catch(e) {
           alert('Fehler: ' + e.message);
         }

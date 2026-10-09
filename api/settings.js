@@ -47,6 +47,10 @@ export default async function handler(req, res) {
         await client.query('UPDATE site_settings SET value = $1 WHERE key = $2', [blob.url, key]);
         
         res.status(200).json({ success: true, key, url: blob.url });
+      } else if (action === 'reset_image') {
+        // Reset image string to empty
+        await client.query('UPDATE site_settings SET value = $1 WHERE key = $2', ['', key]);
+        res.status(200).json({ success: true, key });
       } else {
         res.status(400).json({ error: 'Unknown action' });
       }

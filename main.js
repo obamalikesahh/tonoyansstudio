@@ -307,6 +307,10 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('tonoyans_users', JSON.stringify(currentUsers));
       }
 
+      // Login the customer automatically
+      localStorage.setItem('tonoyans_customer_logged_in_email', email);
+      initCustomerPortal(); // Update UI immediately
+
       step2Form.classList.add('hidden-step');
       if (successScreen) successScreen.classList.remove('hidden-step');
     });
@@ -322,8 +326,107 @@ document.addEventListener('DOMContentLoaded', () => {
   if (closeSuccessBtn && bookingModal) {
     closeSuccessBtn.addEventListener('click', () => {
       bookingModal.classList.remove('active');
+      const loggedEmail = localStorage.getItem('tonoyans_customer_logged_in_email');
+      if (loggedEmail) {
+        openCustomerPortal();
+      }
     });
   }
+
+  // --- Customer Portal Logic ---
+  const btnCustomerPortal = document.getElementById('btn-customer-portal');
+  const portalModal = document.getElementById('customer-portal-modal');
+  const portalClose = document.getElementById('customer-portal-close');
+  const portalBookingsContainer = document.getElementById('portal-bookings-container');
+  const portalEmailDisplay = document.getElementById('portal-customer-email');
+  const btnPortalLogout = document.getElementById('btn-portal-logout');
+
+  function initCustomerPortal() {
+    const loggedEmail = localStorage.getItem('tonoyans_customer_logged_in_email');
+    if (loggedEmail && btnCustomerPortal) {
+      btnCustomerPortal.classList.remove('hidden');
+      if (portalEmailDisplay) portalEmailDisplay.textContent = loggedEmail;
+    } else if (btnCustomerPortal) {
+      btnCustomerPortal.classList.add('hidden');
+    }
+  }
+  initCustomerPortal();
+
+  window.openCustomerPortal = function() {
+    const email = localStorage.getItem('tonoyans_customer_logged_in_email');
+    if (!email) return;
+    
+    // Render bookings
+    const allBookings = JSON.parse(localStorage.getItem('tonoyans_bookings') || '[]');
+    const userBookings = allBookings.filter(b => b.email === email);
+    
+    if (userBookings.length === 0) {
+      portalBookingsContainer.innerHTML = '<p style="color:#666;">Du hast aktuell keine Termine gebucht.</p>';
+    } else {
+      portalBookingsContainer.innerHTML = userBookings.map(b => `
+        <div style="border: 1px solid #eaeaea; border-radius: 12px; padding: 20px; margin-bottom: 15px; position: relative;">
+          <h4 style="margin: 0 0 10px; font-size: 16px;">${b.service}</h4>
+          <p style="margin: 5px 0; font-size: 14px; color: #555;"><strong>Datum:</strong> ${b.date} um ${b.time} Uhr</p>
+          <p style="margin: 5px 0; font-size: 14px; color: #555;"><strong>Preis:</strong> ${b.price}</p>
+          <button onclick="cancelBooking('${b.id}', '${b.name}', '${b.email}', '${b.date}', '${b.time}', '${b.service}')" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: none; padding: 8px 12px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; margin-top: 10px;">
+            Termin stornieren
+          </button>
+        </div>
+      `).join('');
+    }
+    
+    portalModal.classList.remove('hidden');
+  };
+
+  window.cancelBooking = async function(id, name, email, date, time, service) {
+    if (!confirm('Möchtest du diesen Termin wirklich stornieren?')) return;
+    
+    // Remove from localStorage
+    let allBookings = JSON.parse(localStorage.getItem('tonoyans_bookings') || '[]');
+    allBookings = allBookings.filter(b => b.id !== id);
+    localStorage.setItem('tonoyans_bookings', JSON.stringify(allBookings));
+    
+    // Refresh modal
+    openCustomerPortal();
+    
+    // Send cancellation email
+    try {
+      await fetch('/api/cancel-booking', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, date, time, service })
+      });
+      alert('Termin wurde erfolgreich storniert. Eine Bestätigung per E-Mail ist auf dem Weg!');
+    } catch (e) {
+      console.error(e);
+      alert('Termin storniert (E-Mail konnte nicht gesendet werden).');
+    }
+  };
+
+  if (btnCustomerPortal) {
+    btnCustomerPortal.addEventListener('click', (e) => {
+      e.preventDefault();
+      openCustomerPortal();
+    });
+  }
+
+  if (portalClose) {
+    portalClose.addEventListener('click', () => {
+      portalModal.classList.add('hidden');
+    });
+    portalModal.addEventListener('click', (e) => {
+      if (e.target === portalModal) portalModal.classList.add('hidden');
+    });
+  }
+
+  if (btnPortalLogout) {
+    btnPortalLogout.addEventListener('click', () => {
+      localStorage.removeItem('tonoyans_customer_logged_in_email');
+      initCustomerPortal();
+      portalModal.classList.add('hidden');
+    });
+  }
+
 
   // 6. Hero Featured Card Auto-Rotator (Every 5 Seconds)
   const heroServices = [

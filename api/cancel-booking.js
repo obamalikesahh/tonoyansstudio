@@ -5,9 +5,9 @@ export default async function handler(req, res) {
     return res.status(405).json({ message: 'Method Not Allowed' });
   }
 
-  const { name, email, phone, date, time, service } = req.body;
+  const { name, email, date, time, service } = req.body;
 
-  if (!name || !email || !date || !time) {
+  if (!name || !email) {
     return res.status(400).json({ message: 'Missing required fields' });
   }
 
@@ -32,71 +32,50 @@ export default async function handler(req, res) {
     const emailFooter = `
       <div style="text-align: center; margin-top: 40px; border-top: 1px solid #eee; padding-top: 20px;">
         <p style="font-size: 12px; color: #aaa; margin: 0;">© ${new Date().getFullYear()} TONOYANS STUDIO. Alle Rechte vorbehalten.</p>
-        <p style="font-size: 12px; color: #aaa; margin: 5px 0 0;">Stadtweg 47, Schleswig</p>
       </div>
     `;
 
     const commonTable = `
       <table style="width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 14px;">
-        <tr>
-          <td style="padding: 12px; border-bottom: 1px solid #eee; font-weight: 600; width: 40%; color: #555;">Name</td>
-          <td style="padding: 12px; border-bottom: 1px solid #eee; color: #111;">${name}</td>
-        </tr>
-        <tr>
-          <td style="padding: 12px; border-bottom: 1px solid #eee; font-weight: 600; color: #555;">E-Mail</td>
-          <td style="padding: 12px; border-bottom: 1px solid #eee; color: #111;">${email}</td>
-        </tr>
-        <tr>
-          <td style="padding: 12px; border-bottom: 1px solid #eee; font-weight: 600; color: #555;">Telefon</td>
-          <td style="padding: 12px; border-bottom: 1px solid #eee; color: #111;">${phone || '-'}</td>
-        </tr>
-        <tr>
-          <td style="padding: 12px; border-bottom: 1px solid #eee; font-weight: 600; color: #555;">Behandlung</td>
-          <td style="padding: 12px; border-bottom: 1px solid #eee; color: #111;">${service}</td>
-        </tr>
-        <tr>
-          <td style="padding: 12px; font-weight: 600; color: #555;">Datum & Uhrzeit</td>
-          <td style="padding: 12px; color: #111;"><strong>${date}</strong> um <strong>${time} Uhr</strong></td>
-        </tr>
+        <tr><td style="padding: 12px; border-bottom: 1px solid #eee; font-weight: 600; width: 40%; color: #555;">Name</td><td style="padding: 12px; border-bottom: 1px solid #eee; color: #111;">${name}</td></tr>
+        <tr><td style="padding: 12px; border-bottom: 1px solid #eee; font-weight: 600; color: #555;">E-Mail</td><td style="padding: 12px; border-bottom: 1px solid #eee; color: #111;">${email}</td></tr>
+        <tr><td style="padding: 12px; border-bottom: 1px solid #eee; font-weight: 600; color: #555;">Behandlung</td><td style="padding: 12px; border-bottom: 1px solid #eee; color: #111;">${service}</td></tr>
+        <tr><td style="padding: 12px; font-weight: 600; color: #555;">Datum & Uhrzeit</td><td style="padding: 12px; color: #111;"><strong>${date}</strong> um <strong>${time} Uhr</strong></td></tr>
       </table>
     `;
 
-    // 1. Email to Admin
+    // Email to Admin
     await transporter.sendMail({
       from: `"TONOYANS STUDIO Website" <${process.env.EMAIL_USER}>`,
-      to: process.env.EMAIL_USER, // send to admin
-      subject: `Neue Terminanfrage: ${service}`,
+      to: process.env.EMAIL_USER, 
+      subject: `Stornierung: Termin von ${name}`,
       html: `
         <div style="font-family: 'Helvetica Neue', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px; background-color: #fcfcfc; border: 1px solid #eaeaea; border-radius: 12px; color: #333;">
           ${emailHeader}
           <div style="background-color: #ffffff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
-            <h2 style="color: #2c2c2c; margin-top: 0;">Neue Terminanfrage!</h2>
-            <p style="color: #666; line-height: 1.5;">Ein Kunde hat soeben eine verifizierte Buchungsanfrage gestellt.</p>
+            <h2 style="color: #d9534f; margin-top: 0;">Termin storniert!</h2>
+            <p style="color: #666; line-height: 1.5;">Ein Kunde hat seinen Termin über das Kundenportal storniert.</p>
             ${commonTable}
-            <div style="margin-top: 30px; padding: 15px; background: rgba(203, 178, 106, 0.1); border-left: 4px solid #cbb26a; border-radius: 4px;">
-              <p style="margin: 0; font-size: 14px; color: #666;">Bitte setze dich mit dem Kunden in Verbindung, um den Termin final zu bestätigen.</p>
-            </div>
           </div>
           ${emailFooter}
         </div>
       `,
     });
 
-    // 2. Email to Customer
+    // Email to Customer
     await transporter.sendMail({
       from: `"TONOYANS STUDIO" <${process.env.EMAIL_USER}>`,
-      to: email, // send to customer
-      subject: `Deine Terminanfrage im TONOYANS STUDIO`,
+      to: email,
+      subject: `Stornierungsbestätigung - TONOYANS STUDIO`,
       html: `
         <div style="font-family: 'Helvetica Neue', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px; background-color: #fcfcfc; border: 1px solid #eaeaea; border-radius: 12px; color: #333;">
           ${emailHeader}
           <div style="background-color: #ffffff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
             <h2 style="color: #2c2c2c; margin-top: 0;">Hallo ${name},</h2>
-            <p style="color: #666; line-height: 1.5;">Vielen Dank für deine Terminanfrage bei uns im Salon! Deine Anfrage ist erfolgreich bei uns eingegangen.</p>
-            <h3 style="margin-top: 30px; font-size: 16px; border-bottom: 1px solid #eee; padding-bottom: 10px;">Deine Wunschdaten:</h3>
+            <p style="color: #666; line-height: 1.5;">wir bestätigen hiermit die Stornierung deines folgenden Termins:</p>
             ${commonTable}
             <div style="margin-top: 30px; padding: 15px; background: #f8f9fa; border-radius: 6px; text-align: center;">
-              <p style="margin: 0; font-size: 14px; color: #555;">Wir werden uns in Kürze bei dir melden, um den Termin final zu bestätigen.</p>
+              <p style="margin: 0; font-size: 14px; color: #555;">Schade, dass es diesmal nicht klappt! Du kannst jederzeit einen neuen Termin über unsere Website buchen.</p>
             </div>
           </div>
           ${emailFooter}
@@ -106,7 +85,6 @@ export default async function handler(req, res) {
 
     res.status(200).json({ success: true });
   } catch (error) {
-    console.error('Error sending email:', error);
     res.status(500).json({ message: 'Failed to send email', error: error.message });
   }
 }

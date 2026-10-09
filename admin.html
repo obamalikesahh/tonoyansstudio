@@ -622,6 +622,19 @@ TONOYANS STUDIO Schleswig</textarea>
       const dashboard = document.getElementById('admin-dashboard');
       const btnLogout = document.getElementById('btn-logout');
 
+      window.escapeHtml = function(str) {
+        return (str || '').replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+      };
+
+      window.deleteBooking = function(id) {
+        if (confirm('Möchtest du diese Buchung wirklich löschen?')) {
+          let bookings = JSON.parse(localStorage.getItem('tonoyans_bookings') || '[]');
+          bookings = bookings.filter(b => b.id !== id);
+          localStorage.setItem('tonoyans_bookings', JSON.stringify(bookings));
+          renderData();
+        }
+      };
+
       // Check session
       if (sessionStorage.getItem('tonoyans_admin_logged_in') === 'true') {
         loginOverlay.classList.add('hidden');
@@ -799,19 +812,6 @@ TONOYANS STUDIO Schleswig</textarea>
           `).join('');
         }
       }
-
-      window.escapeHtml = function(str) {
-        return (str || '').replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
-      };
-
-      window.deleteBooking = function(id) {
-        if (confirm('Möchtest du diese Buchung wirklich löschen?')) {
-          let bookings = JSON.parse(localStorage.getItem('tonoyans_bookings') || '[]');
-          bookings = bookings.filter(b => b.id !== id);
-          localStorage.setItem('tonoyans_bookings', JSON.stringify(bookings));
-          renderData();
-        }
-      };
 
       // Email modal logic
       const emailModal = document.getElementById('email-modal');

@@ -1,4 +1,4 @@
-/* North/Form High-End Studio Aesthetic Adapted for TONOYANS STUDIO - Luxury Cream & Gold Palette */
+﻿/* North/Form High-End Studio Aesthetic Adapted for TONOYANS STUDIO - Luxury Cream & Gold Palette */
 :root {
   --ink: #1c1815;
   --paper: #f8f4ee;
@@ -1922,6 +1922,7 @@ button {
 
 
 
-. h i d d e n   {   d i s p l a y :   n o n e   ! i m p o r t a n t ;   }  
- # e m a i l - t e m p l a t e - s e l e c t   o p t i o n   {   b a c k g r o u n d :   # 1 a 1 a 1 a ;   c o l o r :   # f f f ;   }  
- 
+. h i d d e n   {   d i s p l a y :   n o n e   ! i m p o r t a n t ;   } 
+
+.hidden { display: none !important; }
+#email-template-select option { background: #1a1a1a; color: #fff; }

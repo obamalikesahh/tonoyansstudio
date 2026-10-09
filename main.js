@@ -609,4 +609,43 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
+
+  // Scroll to Top & Hide Header on Scroll Down
+  const scrollToTopBtn = document.getElementById('scroll-to-top');
+  const siteHeader = document.querySelector('.site-header');
+  let lastScrollY = window.scrollY;
+  const scrollThreshold = 100;
+
+  window.addEventListener('scroll', () => {
+    const currentScrollY = window.scrollY;
+    
+    // Toggle scroll-to-top button
+    if (scrollToTopBtn) {
+      if (currentScrollY > 300) {
+        scrollToTopBtn.classList.add('visible');
+      } else {
+        scrollToTopBtn.classList.remove('visible');
+      }
+    }
+
+    // Toggle header visibility
+    if (siteHeader) {
+      if (currentScrollY > lastScrollY && currentScrollY > scrollThreshold) {
+        // Scrolling down
+        siteHeader.classList.add('hidden-scroll');
+      } else {
+        // Scrolling up
+        siteHeader.classList.remove('hidden-scroll');
+      }
+    }
+    lastScrollY = currentScrollY;
+  });
+
+  if (scrollToTopBtn) {
+    scrollToTopBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  }
+
 });

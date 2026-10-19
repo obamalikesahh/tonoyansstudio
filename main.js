@@ -312,7 +312,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Populate time dropdown for a given date, hiding booked / past slots
-  function populateTimeDropdown(selectedDate) {
+  // Populate time dropdown for a given date, hiding booked / past slots (from Neon Database)
+  async function populateTimeDropdown(selectedDate) {
     if (!timeInput) return;
 
     // Parse date parts to prevent timezone offsets
@@ -329,12 +330,22 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    const allSlots = generateTimeSlots(dayOfWeek);
-    const allBookings = JSON.parse(localStorage.getItem('tonoyans_bookings') || '[]');
-    const bookedTimesOnDate = allBookings
-      .filter(b => b.date === selectedDate)
-      .map(b => b.time);
+    timeInput.innerHTML = '<option value="" disabled selected>Lade freie Uhrzeiten...</option>';
 
+    let bookedTimesOnDate = [];
+    try {
+      const res = await fetch('/api/bookings');
+      if (res.ok) {
+        const allBookings = await res.json();
+        bookedTimesOnDate = allBookings
+          .filter(b => b.date === selectedDate)
+          .map(b => b.time);
+      }
+    } catch(err) {
+      console.warn('Could not fetch booked times from server:', err);
+    }
+
+    const allSlots = generateTimeSlots(dayOfWeek);
     const todayStr = new Date().toISOString().split('T')[0];
     const isToday = selectedDate === todayStr;
     const nowMinutes = isToday ? (new Date().getHours() * 60 + new Date().getMinutes()) : -1;
@@ -343,7 +354,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let hasOptions = false;
 
     allSlots.forEach(slot => {
-      // Skip already booked
+      // Skip already booked on server
       if (bookedTimesOnDate.includes(slot)) return;
       // Skip past times for today
       if (isToday) {
@@ -531,12 +542,19 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      // Check Double Booking
-      const allBookings = JSON.parse(localStorage.getItem('tonoyans_bookings') || '[]');
-      const isBooked = allBookings.some(b => b.date === dateVal && b.time === timeVal);
-      if (isBooked) {
-        showToast(`Leider ist am ${dateVal} um ${timeVal} Uhr bereits ein Termin vergeben. Bitte wähle eine andere Uhrzeit.`, 'error', 'Termin belegt');
-        return;
+      // Check Double Booking against central database
+      try {
+        const bookingsRes = await fetch('/api/bookings');
+        if (bookingsRes.ok) {
+          const allBookings = await bookingsRes.json();
+          const isBooked = allBookings.some(b => b.date === dateVal && b.time === timeVal);
+          if (isBooked) {
+            showToast(`Leider ist am ${dateVal} um ${timeVal} Uhr bereits ein Termin vergeben. Bitte wähle eine andere Uhrzeit.`, 'error', 'Termin belegt');
+            return;
+          }
+        }
+      } catch(checkErr) {
+        console.warn('Could not verify availability with server:', checkErr);
       }
 
       if (sentEmailDisplay) sentEmailDisplay.textContent = emailVal;
@@ -608,52 +626,54 @@ document.addEventListener('DOMContentLoaded', () => {
       const service = modalServiceTitle ? modalServiceTitle.textContent : 'Haarbehandlung';
       const price = modalServicePrice ? modalServicePrice.textContent : '';
 
+      const submitBtn = step2Form.querySelector('button[type="submit"]');
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Termin wird gebucht...';
+      }
+
       try {
-        await fetch('/api/send-booking', {
+        const response = await fetch('/api/send-booking', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, email, phone, date, time, service })
+          body: JSON.stringify({ name, email, phone, date, time, service, price })
         });
+
+        const resData = await response.json();
+
+        if (response.status === 409) {
+          showToast(resData.message || 'Dieser Termin ist leider bereits vergeben.', 'error', 'Termin belegt');
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fa-solid fa-circle-check"></i> Code verifizieren & Termin bestätigen';
+          }
+          return;
+        }
+
+        if (!response.ok) {
+          showToast(resData.message || 'Fehler beim Buchen des Termins.', 'error', 'Fehler');
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fa-solid fa-circle-check"></i> Code verifizieren & Termin bestätigen';
+          }
+          return;
+        }
+
+        // Login customer automatically
+        localStorage.setItem('tonoyans_customer_logged_in_email', email);
+        initCustomerPortal();
+
+        step2Form.classList.add('hidden-step');
+        if (successScreen) successScreen.classList.remove('hidden-step');
       } catch (err) {
-        console.error('Error sending booking to admin:', err);
+        console.error('Error sending booking to server:', err);
+        showToast('Verbindung fehlgeschlagen. Bitte versuche es erneut.', 'error', 'Fehler');
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<i class="fa-solid fa-circle-check"></i> Code verifizieren & Termin bestätigen';
+        }
       }
-
-      const newBooking = {
-        id: 'BOOK-' + Date.now(),
-        name,
-        email,
-        phone,
-        date,
-        time,
-        service,
-        price,
-        verified: true,
-        createdAt: new Date().toISOString()
-      };
-
-      const currentBookings = JSON.parse(localStorage.getItem('tonoyans_bookings') || '[]');
-      currentBookings.unshift(newBooking);
-      localStorage.setItem('tonoyans_bookings', JSON.stringify(currentBookings));
-
-      // Also register customer account
-      const currentUsers = JSON.parse(localStorage.getItem('tonoyans_users') || '[]');
-      if (!currentUsers.some(u => u.email === email)) {
-        currentUsers.push({
-          id: 'USER-' + Date.now(),
-          name,
-          email,
-          phone,
-          registeredAt: new Date().toISOString()
-        });
-        localStorage.setItem('tonoyans_users', JSON.stringify(currentUsers));
-      }
-
-      // Login the customer automatically
-      localStorage.setItem('tonoyans_customer_logged_in_email', email);
-      initCustomerPortal(); // Update UI immediately
-
-      step2Form.classList.add('hidden-step');
-      if (successScreen) successScreen.classList.remove('hidden-step');
     });
   }
 
@@ -689,55 +709,58 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   initCustomerPortal();
 
-  window.openCustomerPortal = function() {
+  window.openCustomerPortal = async function() {
     const email = localStorage.getItem('tonoyans_customer_logged_in_email');
     if (!email) return;
-    
-    // Render bookings
-    const allBookings = JSON.parse(localStorage.getItem('tonoyans_bookings') || '[]');
-    const userBookings = allBookings.filter(b => b.email === email);
-    
-    if (userBookings.length === 0) {
-      portalBookingsContainer.innerHTML = '<p style="color:#666;">Du hast aktuell keine Termine gebucht.</p>';
-    } else {
-      portalBookingsContainer.innerHTML = userBookings.map(b => `
-        <div style="border: 1px solid #eaeaea; border-radius: 12px; padding: 20px; margin-bottom: 15px; position: relative;">
-          <h4 style="margin: 0 0 10px; font-size: 16px;">${b.service}</h4>
-          <p style="margin: 5px 0; font-size: 14px; color: #555;"><strong>Datum:</strong> ${b.date} um ${b.time} Uhr</p>
-          <p style="margin: 5px 0; font-size: 14px; color: #555;"><strong>Preis:</strong> ${b.price}</p>
-          <button onclick="cancelBooking('${b.id}', '${b.name}', '${b.email}', '${b.date}', '${b.time}', '${b.service}')" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: none; padding: 8px 12px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; margin-top: 10px;">
-            Termin stornieren
-          </button>
-        </div>
-      `).join('');
-    }
-    
+
+    portalBookingsContainer.innerHTML = '<p style="color:#666;"><i class="fa-solid fa-spinner fa-spin"></i> Lade deine Termine...</p>';
     portalModal.classList.remove('hidden');
+
+    try {
+      const res = await fetch(`/api/bookings?email=${encodeURIComponent(email)}`);
+      const userBookings = res.ok ? await res.json() : [];
+
+      if (!userBookings || userBookings.length === 0) {
+        portalBookingsContainer.innerHTML = '<p style="color:#666;">Du hast aktuell keine Termine gebucht.</p>';
+      } else {
+        portalBookingsContainer.innerHTML = userBookings.map(b => `
+          <div style="border: 1px solid #eaeaea; border-radius: 12px; padding: 20px; margin-bottom: 15px; position: relative; background: #fff;">
+            <h4 style="margin: 0 0 10px; font-size: 16px; color: #111;">${b.service}</h4>
+            <p style="margin: 5px 0; font-size: 14px; color: #555;"><strong>Datum:</strong> ${b.date} um ${b.time} Uhr</p>
+            <p style="margin: 5px 0; font-size: 14px; color: #555;"><strong>Preis:</strong> ${b.price || ''}</p>
+            <button onclick="cancelBooking('${b.id}', '${b.name}', '${b.email}', '${b.date}', '${b.time}', '${b.service}')" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); padding: 8px 12px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; margin-top: 10px;">
+              <i class="fa-solid fa-trash"></i> Termin stornieren
+            </button>
+          </div>
+        `).join('');
+      }
+    } catch (e) {
+      console.error('Error loading portal bookings:', e);
+      portalBookingsContainer.innerHTML = '<p style="color:red;">Fehler beim Laden deiner Termine.</p>';
+    }
   };
 
   window.cancelBooking = async function(id, name, email, date, time, service) {
     if (!confirm('Möchtest du diesen Termin wirklich stornieren?')) return;
-    
-    // Remove from localStorage
-    let allBookings = JSON.parse(localStorage.getItem('tonoyans_bookings') || '[]');
-    allBookings = allBookings.filter(b => b.id !== id);
-    localStorage.setItem('tonoyans_bookings', JSON.stringify(allBookings));
-    
-    // Refresh modal
-    openCustomerPortal();
-    
-    // Send cancellation email
+
     try {
-      await fetch('/api/cancel-booking', {
+      const res = await fetch('/api/cancel-booking', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, date, time, service })
+        body: JSON.stringify({ id, name, email, date, time, service })
       });
-      showToast('Termin wurde erfolgreich storniert. Eine Bestätigung per E-Mail ist auf dem Weg!', 'success', 'Stornierung');
+      if (res.ok) {
+        showToast('Termin wurde erfolgreich storniert. Eine Bestätigung per E-Mail ist auf dem Weg!', 'success', 'Stornierung');
+      } else {
+        showToast('Termin storniert (E-Mail konnte nicht gesendet werden).', 'info', 'Hinweis');
+      }
     } catch (e) {
       console.error(e);
       showToast('Termin storniert (E-Mail konnte nicht gesendet werden).', 'info', 'Hinweis');
     }
+
+    // Refresh modal from DB
+    openCustomerPortal();
   };
 
   if (btnCustomerPortal) {

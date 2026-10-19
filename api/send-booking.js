@@ -1,14 +1,61 @@
 import nodemailer from 'nodemailer';
+import { Client } from 'pg';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Method Not Allowed' });
   }
 
-  const { name, email, phone, date, time, service } = req.body;
+  const { name, email, phone, date, time, service, price } = req.body;
 
   if (!name || !email || !date || !time) {
     return res.status(400).json({ message: 'Missing required fields' });
+  }
+
+  // Connect to PostgreSQL to check availability and persist booking
+  const dbClient = new Client({
+    connectionString: process.env.DATABASE_URL
+  });
+
+  let bookingId = 'BOOK-' + Date.now();
+
+  try {
+    await dbClient.connect();
+
+    // Check if slot is already booked in database
+    const existing = await dbClient.query(
+      'SELECT id FROM bookings WHERE date = $1 AND time = $2',
+      [date, time]
+    );
+
+    if (existing.rows.length > 0) {
+      await dbClient.end();
+      return res.status(409).json({ 
+        message: `Leider ist am ${date} um ${time} Uhr bereits ein Termin vergeben. Bitte wähle eine andere Uhrzeit.` 
+      });
+    }
+
+    // Save booking into PostgreSQL
+    await dbClient.query(
+      `INSERT INTO bookings (id, name, email, phone, date, time, service, price, status, created_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'confirmed', $9)`,
+      [bookingId, name, email, phone || '', date, time, service || '', price || '', new Date().toISOString()]
+    );
+
+    // Save or update registered user
+    const userId = 'USER-' + Date.now();
+    await dbClient.query(
+      `INSERT INTO registered_users (id, name, email, phone, registered_at)
+       VALUES ($1, $2, $3, $4, $5)
+       ON CONFLICT (email) DO UPDATE SET name = EXCLUDED.name, phone = EXCLUDED.phone`,
+      [userId, name, email, phone || '', new Date().toISOString()]
+    );
+
+    await dbClient.end();
+  } catch (dbErr) {
+    console.error('Database insertion error:', dbErr);
+    try { await dbClient.end(); } catch(_) {}
+    return res.status(500).json({ message: 'Database error', error: dbErr.message });
   }
 
   const transporter = nodemailer.createTransport({
@@ -104,7 +151,7 @@ export default async function handler(req, res) {
       `,
     });
 
-    res.status(200).json({ success: true });
+    res.status(200).json({ success: true, id: bookingId });
   } catch (error) {
     console.error('Error sending email:', error);
     res.status(500).json({ message: 'Failed to send email', error: error.message });

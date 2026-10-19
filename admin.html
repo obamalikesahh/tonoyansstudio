@@ -757,33 +757,37 @@ TONOYANS STUDIO Schleswig</textarea>
         return (str || '').replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
       };
 
-      window.deleteBooking = function(id) {
-        if (confirm('Möchtest du diese Buchung wirklich löschen? (Keine E-Mail wird gesendet)')) {
-          let bookings = JSON.parse(localStorage.getItem('tonoyans_bookings') || '[]');
-          bookings = bookings.filter(b => b.id !== id);
-          localStorage.setItem('tonoyans_bookings', JSON.stringify(bookings));
-          renderData();
+      window.deleteBooking = async function(id) {
+        if (!confirm('Möchtest du diese Buchung wirklich löschen? (Keine E-Mail wird gesendet)')) return;
+        try {
+          const res = await fetch('/api/bookings', {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id })
+          });
+          if (res.ok) {
+            showAdminToast('Buchung erfolgreich gelöscht.', 'success', 'Gelöscht');
+            renderData();
+          } else {
+            showAdminToast('Fehler beim Löschen der Buchung.', 'error', 'Fehler');
+          }
+        } catch(e) {
+          showAdminToast('Fehler: ' + e.message, 'error', 'Fehler');
         }
       };
 
       window.adminCancelBooking = async function(id, name, email, date, time, service) {
         if (!confirm(`Termin von ${name} am ${date} um ${time} Uhr stornieren?\n\nEs wird eine Stornierungs-E-Mail an den Kunden und an das Studio gesendet.`)) return;
 
-        // Remove from localStorage
-        let bookings = JSON.parse(localStorage.getItem('tonoyans_bookings') || '[]');
-        bookings = bookings.filter(b => b.id !== id);
-        localStorage.setItem('tonoyans_bookings', JSON.stringify(bookings));
-        renderData();
-
-        // Send cancellation emails via API
         try {
           const res = await fetch('/api/cancel-booking', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, email, date, time, service })
+            body: JSON.stringify({ id, name, email, date, time, service })
           });
           if (res.ok) {
             showAdminToast(`Termin storniert! Eine Stornierungs-E-Mail wurde an ${email} gesendet.`, 'success', 'Storniert');
+            renderData();
           } else {
             showAdminToast('Termin storniert, aber E-Mail konnte nicht gesendet werden.', 'error', 'E-Mail Fehler');
           }
@@ -822,68 +826,13 @@ TONOYANS STUDIO Schleswig</textarea>
         window.location.reload();
       });
 
-      // Default demo initial data if empty
-      function seedDemoData() {
-        if (!localStorage.getItem('tonoyans_bookings')) {
-          const defaultBookings = [
-            {
-              id: 'BOOK-1772985102',
-              name: 'Laura Schmidt',
-              email: 'laura.schmidt@beispiel.de',
-              phone: '+49 176 98765432',
-              date: '2026-10-12',
-              time: '10:30',
-              service: 'Balayage / AirTouch',
-              price: 'ab 150 €',
-              verified: true,
-              createdAt: new Date().toISOString()
-            },
-            {
-              id: 'BOOK-1772989400',
-              name: 'Michael Weber',
-              email: 'm.weber@beispiel.de',
-              phone: '+49 171 1234567',
-              date: '2026-10-14',
-              time: '14:00',
-              service: 'Herren Waschen / Schneiden / Styling',
-              price: '35 €',
-              verified: true,
-              createdAt: new Date().toISOString()
-            }
-          ];
-          localStorage.setItem('tonoyans_bookings', JSON.stringify(defaultBookings));
-        }
-
-        if (!localStorage.getItem('tonoyans_users')) {
-          const defaultUsers = [
-            {
-              id: 'USER-101',
-              name: 'Laura Schmidt',
-              email: 'laura.schmidt@beispiel.de',
-              phone: '+49 176 98765432',
-              registeredAt: new Date().toISOString()
-            },
-            {
-              id: 'USER-102',
-              name: 'Michael Weber',
-              email: 'm.weber@beispiel.de',
-              phone: '+49 171 1234567',
-              registeredAt: new Date().toISOString()
-            }
-          ];
-          localStorage.setItem('tonoyans_users', JSON.stringify(defaultUsers));
-        }
-      }
-
       function initDashboard() {
-        seedDemoData();
         renderData();
 
-        // Realtime 2s auto-refresh
+        // Realtime 3s auto-refresh from Database
         setInterval(() => {
           renderData();
-          document.getElementById('last-updated-text').textContent = 'Zuletzt aktualisiert: ' + new Date().toLocaleTimeString();
-        }, 2000);
+        }, 3000);
 
         // Tab Switching
         const tabBtns = document.querySelectorAll('.tab-btn');
@@ -1044,73 +993,84 @@ TONOYANS STUDIO Schleswig</textarea>
         reader.readAsDataURL(file);
       };
 
-      function renderData() {
-        const bookings = JSON.parse(localStorage.getItem('tonoyans_bookings') || '[]');
-        const users = JSON.parse(localStorage.getItem('tonoyans_users') || '[]');
+      async function renderData() {
+        try {
+          const [bookingsRes, usersRes] = await Promise.all([
+            fetch('/api/bookings'),
+            fetch('/api/bookings?type=users')
+          ]);
 
-        // Stats
-        document.getElementById('stat-total-bookings').textContent = bookings.length;
-        document.getElementById('stat-total-users').textContent = users.length;
-        document.getElementById('stat-today-bookings').textContent = bookings.length;
+          const bookings = bookingsRes.ok ? await bookingsRes.json() : [];
+          const users = usersRes.ok ? await usersRes.json() : [];
 
-        // Render Bookings
-        const bookingsBody = document.getElementById('bookings-table-body');
-        if (bookings.length === 0) {
-          bookingsBody.innerHTML = `<tr><td colspan="6" style="text-align:center; color: var(--text-muted);">Keine Buchungen vorhanden</td></tr>`;
-        } else {
-          bookingsBody.innerHTML = bookings.map(b => `
-            <tr>
-              <td>
-                <strong>${b.id}</strong><br>
-                <small style="color: var(--text-muted);">${new Date(b.createdAt).toLocaleDateString()}</small>
-              </td>
-              <td>
-                <strong>${escapeHtml(b.name)}</strong><br>
-                <small style="color: var(--text-muted);">${escapeHtml(b.email || 'Keine Mail')}</small><br>
-                <small style="color: var(--text-muted);">${escapeHtml(b.phone)}</small>
-              </td>
-              <td>
-                <strong>${escapeHtml(b.service)}</strong><br>
-                <small style="color: var(--accent-gold);">${escapeHtml(b.price)}</small>
-              </td>
-              <td>
-                <strong>${escapeHtml(b.date)}</strong> um <strong>${escapeHtml(b.time)} Uhr</strong>
-              </td>
-              <td>
-                <span class="status-badge"><i class="fa-solid fa-circle-check"></i> SMS-Verifiziert</span>
-              </td>
-              <td style="white-space: nowrap;">
-                <a href="#" class="btn-action-email" onclick="openEmailModal('${escapeHtml(b.email)}'); return false;">
-                  <i class="fa-solid fa-paper-plane"></i> E-Mail
-                </a>
-                <button class="btn-cancel-booking" onclick="adminCancelBooking('${escapeHtml(b.id)}', '${escapeHtml(b.name)}', '${escapeHtml(b.email)}', '${escapeHtml(b.date)}', '${escapeHtml(b.time)}', '${escapeHtml(b.service)}')" title="Termin stornieren &amp; E-Mail senden" style="background: rgba(251,146,60,0.15); color: #fb923c; border: 1px solid rgba(251,146,60,0.3); padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; margin-left: 6px; transition: all 0.2s; font-weight:600;">
-                  <i class="fa-solid fa-calendar-xmark"></i> Stornieren
-                </button>
-                <button class="btn-delete" onclick="deleteBooking('${b.id}')" title="Endgültig löschen (keine E-Mail)"><i class="fa-solid fa-trash"></i></button>
-              </td>
-            </tr>
-          `).join('');
-        }
+          // Stats
+          document.getElementById('stat-total-bookings').textContent = bookings.length;
+          document.getElementById('stat-total-users').textContent = users.length;
+          document.getElementById('stat-today-bookings').textContent = bookings.length;
+          const updatedEl = document.getElementById('last-updated-text');
+          if (updatedEl) updatedEl.textContent = 'Zuletzt aktualisiert: ' + new Date().toLocaleTimeString();
 
-        // Render Users
-        const usersBody = document.getElementById('users-table-body');
-        if (users.length === 0) {
-          usersBody.innerHTML = `<tr><td colspan="6" style="text-align:center; color: var(--text-muted);">Keine Nutzer registriert</td></tr>`;
-        } else {
-          usersBody.innerHTML = users.map(u => `
-            <tr>
-              <td><strong>${u.id}</strong></td>
-              <td><strong>${escapeHtml(u.name)}</strong></td>
-              <td>${escapeHtml(u.email || '-')}</td>
-              <td>${escapeHtml(u.phone)}</td>
-              <td><small style="color: var(--text-muted);">${new Date(u.registeredAt || Date.now()).toLocaleDateString()}</small></td>
-              <td>
-                <a href="#" class="btn-action-email" onclick="openEmailModal('${escapeHtml(u.email)}'); return false;">
-                  <i class="fa-solid fa-paper-plane"></i> Direkt Mailen
-                </a>
-              </td>
-            </tr>
-          `).join('');
+          // Render Bookings
+          const bookingsBody = document.getElementById('bookings-table-body');
+          if (!bookings || bookings.length === 0) {
+            bookingsBody.innerHTML = `<tr><td colspan="6" style="text-align:center; color: var(--text-muted); padding: 24px;">Keine Buchungen vorhanden</td></tr>`;
+          } else {
+            bookingsBody.innerHTML = bookings.map(b => `
+              <tr>
+                <td>
+                  <strong>${b.id}</strong><br>
+                  <small style="color: var(--text-muted);">${b.created_at ? new Date(b.created_at).toLocaleDateString() : ''}</small>
+                </td>
+                <td>
+                  <strong>${escapeHtml(b.name)}</strong><br>
+                  <small style="color: var(--text-muted);">${escapeHtml(b.email || 'Keine Mail')}</small><br>
+                  <small style="color: var(--text-muted);">${escapeHtml(b.phone || '-')}</small>
+                </td>
+                <td>
+                  <strong>${escapeHtml(b.service)}</strong><br>
+                  <small style="color: var(--accent-gold);">${escapeHtml(b.price || '')}</small>
+                </td>
+                <td>
+                  <strong>${escapeHtml(b.date)}</strong> um <strong>${escapeHtml(b.time)} Uhr</strong>
+                </td>
+                <td>
+                  <span class="status-badge"><i class="fa-solid fa-circle-check"></i> Bestätigt</span>
+                </td>
+                <td style="white-space: nowrap;">
+                  <a href="#" class="btn-action-email" onclick="openEmailModal('${escapeHtml(b.email)}'); return false;">
+                    <i class="fa-solid fa-paper-plane"></i> E-Mail
+                  </a>
+                  <button class="btn-cancel-booking" onclick="adminCancelBooking('${escapeHtml(b.id)}', '${escapeHtml(b.name)}', '${escapeHtml(b.email)}', '${escapeHtml(b.date)}', '${escapeHtml(b.time)}', '${escapeHtml(b.service)}')" title="Termin stornieren &amp; E-Mail senden" style="background: rgba(251,146,60,0.15); color: #fb923c; border: 1px solid rgba(251,146,60,0.3); padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; margin-left: 6px; transition: all 0.2s; font-weight:600;">
+                    <i class="fa-solid fa-calendar-xmark"></i> Stornieren
+                  </button>
+                  <button class="btn-delete" onclick="deleteBooking('${b.id}')" title="Endgültig löschen (keine E-Mail)"><i class="fa-solid fa-trash"></i></button>
+                </td>
+              </tr>
+            `).join('');
+          }
+
+          // Render Users
+          const usersBody = document.getElementById('users-table-body');
+          if (!users || users.length === 0) {
+            usersBody.innerHTML = `<tr><td colspan="6" style="text-align:center; color: var(--text-muted); padding: 24px;">Keine Nutzer registriert</td></tr>`;
+          } else {
+            usersBody.innerHTML = users.map(u => `
+              <tr>
+                <td><strong>${u.id}</strong></td>
+                <td><strong>${escapeHtml(u.name)}</strong></td>
+                <td>${escapeHtml(u.email || '-')}</td>
+                <td>${escapeHtml(u.phone || '-')}</td>
+                <td><small style="color: var(--text-muted);">${u.registered_at ? new Date(u.registered_at).toLocaleDateString() : ''}</small></td>
+                <td>
+                  <a href="#" class="btn-action-email" onclick="openEmailModal('${escapeHtml(u.email)}'); return false;">
+                    <i class="fa-solid fa-paper-plane"></i> Direkt Mailen
+                  </a>
+                </td>
+              </tr>
+            `).join('');
+          }
+        } catch(err) {
+          console.error('Error fetching admin data:', err);
         }
       }
 

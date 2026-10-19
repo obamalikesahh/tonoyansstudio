@@ -1,14 +1,33 @@
 import nodemailer from 'nodemailer';
+import { Client } from 'pg';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Method Not Allowed' });
   }
 
-  const { name, email, date, time, service } = req.body;
+  const { id, name, email, date, time, service } = req.body;
 
   if (!name || !email) {
     return res.status(400).json({ message: 'Missing required fields' });
+  }
+
+  // Delete from Neon PostgreSQL database
+  const dbClient = new Client({
+    connectionString: process.env.DATABASE_URL
+  });
+
+  try {
+    await dbClient.connect();
+    if (id) {
+      await dbClient.query('DELETE FROM bookings WHERE id = $1', [id]);
+    } else if (date && time) {
+      await dbClient.query('DELETE FROM bookings WHERE LOWER(email) = LOWER($1) AND date = $2 AND time = $3', [email, date, time]);
+    }
+    await dbClient.end();
+  } catch (dbErr) {
+    console.error('Database deletion error on cancel:', dbErr);
+    try { await dbClient.end(); } catch(_) {}
   }
 
   const transporter = nodemailer.createTransport({

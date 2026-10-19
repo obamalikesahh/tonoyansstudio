@@ -424,8 +424,72 @@
       resize: vertical;
     }
 
-    .hidden {
-      display: none !important;
+    /* Toast Notification System */
+    .admin-toast-container {
+      position: fixed;
+      top: 24px;
+      right: 24px;
+      z-index: 999999;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-width: 400px;
+      width: calc(100vw - 32px);
+      pointer-events: none;
+    }
+
+    .admin-toast {
+      pointer-events: auto;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      background: #1c1e2b;
+      border: 1px solid var(--accent-gold);
+      border-radius: 12px;
+      padding: 14px 18px;
+      color: #fff;
+      box-shadow: 0 16px 40px rgba(0,0,0,0.6);
+      animation: adminToastIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      transition: all 0.25s ease;
+    }
+
+    .admin-toast.toast-error {
+      border-color: var(--danger);
+    }
+
+    .admin-toast.toast-success {
+      border-color: var(--success);
+    }
+
+    .admin-toast-icon {
+      font-size: 1.2rem;
+      margin-top: 1px;
+    }
+
+    .toast-error .admin-toast-icon { color: var(--danger); }
+    .toast-success .admin-toast-icon { color: var(--success); }
+    .toast-info .admin-toast-icon { color: var(--accent-gold); }
+
+    .admin-toast-body { flex: 1; }
+    .admin-toast-title { font-weight: 700; font-size: 13px; margin-bottom: 2px; }
+    .admin-toast-text { font-size: 12px; color: var(--text-muted); line-height: 1.4; }
+    .admin-toast-close {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 1.1rem;
+    }
+    .admin-toast-close:hover { color: #fff; }
+
+    .admin-toast.hide {
+      opacity: 0;
+      transform: translateY(-12px);
+    }
+
+    @keyframes adminToastIn {
+      from { opacity: 0; transform: translateY(-16px); }
+      to { opacity: 1; transform: translateY(0); }
     }
   </style>
 </head>
@@ -629,6 +693,55 @@ TONOYANS STUDIO Schleswig</textarea>
   </div>
 
   <script>
+    function showAdminToast(message, type = 'info', title = null) {
+      let container = document.getElementById('admin-toast-container');
+      if (!container) {
+        container = document.createElement('div');
+        container.id = 'admin-toast-container';
+        container.className = 'admin-toast-container';
+        document.body.appendChild(container);
+      }
+
+      const toast = document.createElement('div');
+      toast.className = `admin-toast toast-${type}`;
+
+      const iconMap = {
+        error: '<i class="fa-solid fa-circle-exclamation"></i>',
+        success: '<i class="fa-solid fa-circle-check"></i>',
+        info: '<i class="fa-solid fa-circle-info"></i>'
+      };
+
+      const defaultTitles = {
+        error: 'Fehler',
+        success: 'Erfolg',
+        info: 'Hinweis'
+      };
+
+      const displayTitle = title || defaultTitles[type] || 'Hinweis';
+      const displayIcon = iconMap[type] || iconMap.info;
+      const cleanMessage = message.replace(/^[\u274C\u23F3\u2705]\s*/g, '');
+
+      toast.innerHTML = `
+        <div class="admin-toast-icon">${displayIcon}</div>
+        <div class="admin-toast-body">
+          <div class="admin-toast-title">${displayTitle}</div>
+          <div class="admin-toast-text">${cleanMessage}</div>
+        </div>
+        <button class="admin-toast-close" aria-label="Schließen">&times;</button>
+      `;
+
+      const closeBtn = toast.querySelector('.admin-toast-close');
+      const dismiss = () => {
+        if (toast.classList.contains('hide')) return;
+        toast.classList.add('hide');
+        setTimeout(() => toast.remove(), 260);
+      };
+
+      closeBtn.addEventListener('click', dismiss);
+      container.appendChild(toast);
+      setTimeout(dismiss, 4200);
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
       const loginOverlay = document.getElementById('admin-login-overlay');
       const loginForm = document.getElementById('admin-login-form');
@@ -666,13 +779,13 @@ TONOYANS STUDIO Schleswig</textarea>
             body: JSON.stringify({ name, email, date, time, service })
           });
           if (res.ok) {
-            alert(`✅ Termin storniert! Eine Stornierungs-E-Mail wurde an ${email} gesendet.`);
+            showAdminToast(`Termin storniert! Eine Stornierungs-E-Mail wurde an ${email} gesendet.`, 'success', 'Storniert');
           } else {
-            alert('Termin storniert, aber E-Mail konnte nicht gesendet werden.');
+            showAdminToast('Termin storniert, aber E-Mail konnte nicht gesendet werden.', 'error', 'E-Mail Fehler');
           }
         } catch (e) {
           console.error(e);
-          alert('Termin storniert, aber E-Mail konnte nicht gesendet werden.');
+          showAdminToast('Termin storniert, aber E-Mail konnte nicht gesendet werden.', 'error', 'E-Mail Fehler');
         }
       };
 
@@ -861,9 +974,9 @@ TONOYANS STUDIO Schleswig</textarea>
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({ action: 'update_price', key, value })
           });
-          if (res.ok) alert('Preis erfolgreich aktualisiert!');
+          if (res.ok) showAdminToast('Preis erfolgreich aktualisiert!', 'success', 'Gespeichert');
         } catch(e) {
-          alert('Fehler: ' + e.message);
+          showAdminToast('Fehler: ' + e.message, 'error', 'Fehler');
         }
       };
 
@@ -879,10 +992,10 @@ TONOYANS STUDIO Schleswig</textarea>
             document.getElementById('img-preview-' + key).src = '';
             document.getElementById('img-preview-' + key).style.display = 'none';
             document.getElementById('img-default-' + key).style.display = 'flex';
-            alert('Bild erfolgreich zurückgesetzt!');
+            showAdminToast('Bild erfolgreich zurückgesetzt!', 'success', 'Zurückgesetzt');
           }
         } catch(e) {
-          alert('Fehler: ' + e.message);
+          showAdminToast('Fehler: ' + e.message, 'error', 'Fehler');
         }
       };
 
@@ -913,12 +1026,12 @@ TONOYANS STUDIO Schleswig</textarea>
               document.getElementById('img-preview-' + key).src = result.url;
               document.getElementById('img-preview-' + key).style.display = 'block';
               document.getElementById('img-default-' + key).style.display = 'none';
-              alert('Bild erfolgreich aktualisiert!');
+              showAdminToast('Bild erfolgreich aktualisiert!', 'success', 'Aktualisiert');
             } else {
-              alert('Fehler: ' + result.error);
+              showAdminToast('Fehler: ' + result.error, 'error', 'Fehler');
             }
           } catch(err) {
-            alert('Upload Fehler: ' + err.message);
+            showAdminToast('Upload Fehler: ' + err.message, 'error', 'Fehler');
           } finally {
             input.disabled = false;
             input.style.opacity = '1';
@@ -1039,7 +1152,7 @@ TONOYANS STUDIO Schleswig</textarea>
 
       window.openEmailModal = function(email) {
         if (!email) {
-          alert('Für diesen Kunden wurde keine E-Mail-Adresse angegeben.');
+          showAdminToast('Für diesen Kunden wurde keine E-Mail-Adresse angegeben.', 'info', 'Keine E-Mail');
           return;
         }
         emailToInput.value = email;
@@ -1067,14 +1180,14 @@ TONOYANS STUDIO Schleswig</textarea>
           });
           
           if (res.ok) {
-            alert('E-Mail erfolgreich gesendet!');
+            showAdminToast('E-Mail erfolgreich gesendet!', 'success', 'Versendet');
             emailModal.classList.add('hidden');
           } else {
-            alert('Fehler beim Senden der E-Mail.');
+            showAdminToast('Fehler beim Senden der E-Mail.', 'error', 'Fehler');
           }
         } catch (error) {
           console.error(error);
-          alert('Ein Fehler ist aufgetreten beim Senden.');
+          showAdminToast('Ein Fehler ist aufgetreten beim Senden.', 'error', 'Fehler');
         } finally {
           btnSubmitEmail.disabled = false;
           btnSubmitEmail.innerHTML = '<i class="fa-solid fa-paper-plane"></i> E-Mail automatisch senden';

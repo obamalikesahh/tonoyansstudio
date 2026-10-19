@@ -4,6 +4,60 @@ import imgBalayage from './Arbeit/thumb_balayage.png';
 import imgCut from './Arbeit/thumb_cut.png';
 import imgGloss from './Arbeit/thumb_gloss.png';
 
+// Helper: Elegant Studio Toast Notification (replaces browser alert popups)
+function showToast(message, type = 'info', title = null) {
+  let container = document.getElementById('custom-toast-container');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'custom-toast-container';
+    container.className = 'custom-toast-container';
+    document.body.appendChild(container);
+  }
+
+  const toast = document.createElement('div');
+  toast.className = `custom-toast toast-${type}`;
+
+  const iconMap = {
+    error: '<i class="fa-solid fa-circle-exclamation"></i>',
+    success: '<i class="fa-solid fa-circle-check"></i>',
+    info: '<i class="fa-solid fa-circle-info"></i>'
+  };
+
+  const defaultTitles = {
+    error: 'Hinweis',
+    success: 'Erfolgreich',
+    info: 'Information'
+  };
+
+  const displayTitle = title || defaultTitles[type] || 'Hinweis';
+  const displayIcon = iconMap[type] || iconMap.info;
+
+  // Clean raw emoji prefixes from legacy alert strings if present
+  const cleanMessage = message.replace(/^[\u274C\u23F3\u2705]\s*/g, '');
+
+  toast.innerHTML = `
+    <div class="custom-toast-icon">${displayIcon}</div>
+    <div class="custom-toast-body">
+      <div class="custom-toast-title">${displayTitle}</div>
+      <div class="custom-toast-text">${cleanMessage}</div>
+    </div>
+    <button class="custom-toast-close" aria-label="Schließen">&times;</button>
+  `;
+
+  const closeBtn = toast.querySelector('.custom-toast-close');
+  const dismiss = () => {
+    if (toast.classList.contains('hide')) return;
+    toast.classList.add('hide');
+    setTimeout(() => toast.remove(), 320);
+  };
+
+  closeBtn.addEventListener('click', dismiss);
+  container.appendChild(toast);
+
+  // Auto remove after 4.5 seconds
+  setTimeout(dismiss, 4500);
+}
+
 document.addEventListener('DOMContentLoaded', () => {
 
   // 1. Preloader Fadeout
@@ -116,6 +170,15 @@ document.addEventListener('DOMContentLoaded', () => {
           icon.className = 'fa-solid fa-bars';
         }
       }
+    });
+
+    // Close menu when a link is clicked
+    navMenu.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', () => {
+        navMenu.classList.remove('open');
+        const icon = mobileToggle.querySelector('i');
+        if (icon) icon.className = 'fa-solid fa-bars';
+      });
     });
   }
 
@@ -260,7 +323,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (dayOfWeek === 0) {
       timeInput.innerHTML = '<option value="" disabled selected>Sonntags geschlossen</option>';
       if (dateInput) {
-        alert('Sonntags hat das Studio geschlossen. Bitte wählen Sie einen Termin von Montag bis Samstag.');
+        showToast('Sonntags hat das Studio geschlossen. Bitte wählen Sie einen Termin von Montag bis Samstag.', 'info', 'Öffnungszeiten');
         dateInput.value = '';
       }
       return;
@@ -437,26 +500,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // ── 1. E-Mail Format
       if (!isValidEmailFormat(emailVal)) {
-        alert('\u274C Bitte gib eine gültige E-Mail-Adresse ein (z. B. name@beispiel.de).');
+        showToast('Bitte gib eine gültige E-Mail-Adresse ein (z. B. name@beispiel.de).', 'error', 'Ungültige E-Mail');
         return;
       }
 
       // ── 2. Wegwerf-E-Mail
       if (isDisposableEmail(emailVal)) {
-        alert('\u274C Diese E-Mail-Domain ist nicht erlaubt. Bitte verwende deine echte E-Mail-Adresse (z. B. Gmail, GMX, iCloud).');
+        showToast('Diese E-Mail-Domain ist nicht erlaubt. Bitte verwende deine echte E-Mail-Adresse (z. B. Gmail, GMX, iCloud).', 'error', 'E-Mail nicht zulässig');
         return;
       }
 
       // ── 3. Telefonnummer
       if (!isValidPhone(phoneVal)) {
-        alert('\u274C Bitte gib eine gültige Handynummer ein. Wegwerf- oder Testnummern werden nicht akzeptiert.');
+        showToast('Bitte gib eine gültige Handynummer ein. Wegwerf- oder Testnummern werden nicht akzeptiert.', 'error', 'Ungültige Telefonnummer');
         return;
       }
 
       // ── 4. CAPTCHA
       const captchaInput = document.getElementById('cust-captcha');
       if (captchaInput && captchaInput.value.toUpperCase() !== currentCaptchaText) {
-        alert('\u274C Bot-Schutz: Der eingegebene Code ist falsch!');
+        showToast('Bot-Schutz: Der eingegebene Code ist falsch!', 'error', 'Sicherheitsabfrage');
         generateCaptcha();
         return;
       }
@@ -464,7 +527,7 @@ document.addEventListener('DOMContentLoaded', () => {
       // ── 5. Rate Limit (100/Stunde)
       const rateCheck = checkRateLimit();
       if (rateCheck.blocked) {
-        alert(`\u23F3 Zu viele Anfragen. Bitte warte noch ca. ${rateCheck.waitMin} Minute(n) und versuche es erneut.`);
+        showToast(`Zu viele Anfragen. Bitte warte noch ca. ${rateCheck.waitMin} Minute(n) und versuche es erneut.`, 'error', 'Bitte warten');
         return;
       }
 
@@ -472,7 +535,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const allBookings = JSON.parse(localStorage.getItem('tonoyans_bookings') || '[]');
       const isBooked = allBookings.some(b => b.date === dateVal && b.time === timeVal);
       if (isBooked) {
-        alert(`Leider ist am ${dateVal} um ${timeVal} Uhr bereits ein Termin vergeben. Bitte wähle eine andere Uhrzeit.`);
+        showToast(`Leider ist am ${dateVal} um ${timeVal} Uhr bereits ein Termin vergeben. Bitte wähle eine andere Uhrzeit.`, 'error', 'Termin belegt');
         return;
       }
 
@@ -533,7 +596,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const inputs = document.querySelectorAll('.code-digit');
       const enteredCode = Array.from(inputs).map(i => i.value).join('');
       if (window.currentVerificationCode && enteredCode !== window.currentVerificationCode) {
-        alert('Falscher Code. Bitte überprüfen Sie Ihre E-Mail.');
+        showToast('Falscher Code. Bitte überprüfen Sie Ihre E-Mail.', 'error', 'Code ungültig');
         return;
       }
 
@@ -670,10 +733,10 @@ document.addEventListener('DOMContentLoaded', () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, email, date, time, service })
       });
-      alert('Termin wurde erfolgreich storniert. Eine Bestätigung per E-Mail ist auf dem Weg!');
+      showToast('Termin wurde erfolgreich storniert. Eine Bestätigung per E-Mail ist auf dem Weg!', 'success', 'Stornierung');
     } catch (e) {
       console.error(e);
-      alert('Termin storniert (E-Mail konnte nicht gesendet werden).');
+      showToast('Termin storniert (E-Mail konnte nicht gesendet werden).', 'info', 'Hinweis');
     }
   };
 

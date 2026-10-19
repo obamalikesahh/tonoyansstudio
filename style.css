@@ -1360,11 +1360,80 @@ button {
   color: var(--accent);
 }
 
+/* Header Actions Container */
+.header-actions {
+  display: flex;
+  gap: 10px;
+  justify-self: end;
+  align-items: center;
+}
+
 /* Responsive Breakpoints */
 @media (max-width: 900px) {
-  .nav { display: none; }
-  .site-header { grid-template-columns: 1fr auto; }
-  .mobile-toggle-btn { display: block; }
+  .site-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 16px;
+  }
+  .header-actions {
+    display: none; /* Auf Tablets & Handys aus dem schmalen Header entfernen, bleibt im Menü und Hero */
+  }
+  .mobile-toggle-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #fff;
+    cursor: pointer;
+    font-size: 1.1rem;
+    transition: background 0.2s ease, transform 0.2s ease;
+  }
+  .mobile-toggle-btn:active {
+    transform: scale(0.92);
+  }
+  
+  /* Mobile Dropdown Nav Menu */
+  .nav {
+    display: none;
+    position: fixed;
+    top: 76px;
+    left: var(--pad, 14px);
+    right: var(--pad, 14px);
+    background: rgba(16, 15, 14, 0.96);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(212, 175, 55, 0.25);
+    border-radius: 20px;
+    padding: 20px 16px;
+    flex-direction: column;
+    gap: 8px;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6);
+    z-index: 1001;
+    animation: mobileMenuFadeIn 0.25s ease-out forwards;
+  }
+  .nav.open {
+    display: flex;
+  }
+  .nav a {
+    padding: 12px 18px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    border-radius: 12px;
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.03);
+  }
+  .nav a:hover, .nav a:active {
+    background: #cbac63;
+    color: #000;
+  }
+  
   .intro-portrait { grid-column: 1 / -1; height: 50vh; }
   .keywords, .intro-copy, .stats-mini { grid-column: 1 / -1; }
   .cap-row { grid-template-columns: 50px 1fr; }
@@ -1374,6 +1443,37 @@ button {
   .footer-main { grid-template-columns: 1fr; gap: 40px; }
   .framer-banner-grid { height: auto; flex-direction: column; }
   .framer-banner-card { height: 260px; width: 100% !important; }
+}
+
+@media (max-width: 600px) {
+  .site-header {
+    top: 10px;
+    left: 12px;
+    right: 12px;
+    height: 52px;
+    padding: 0 14px;
+  }
+  .logo {
+    font-size: 13px;
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+  }
+  .nav {
+    top: 68px;
+    left: 12px;
+    right: 12px;
+  }
+}
+
+@keyframes mobileMenuFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Custom Cyber-Gold Glowing Button Component */
@@ -1969,5 +2069,127 @@ html {
   transform: translateY(-150%);
   opacity: 0;
   pointer-events: none;
+}
+
+/* Premium Toast Notification System */
+.custom-toast-container {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  z-index: 999999;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 420px;
+  width: calc(100vw - 32px);
+  pointer-events: none;
+}
+
+.custom-toast {
+  pointer-events: auto;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  background: rgba(18, 17, 16, 0.94);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(212, 175, 55, 0.35);
+  box-shadow: 0 16px 45px rgba(0, 0, 0, 0.6), 0 0 18px rgba(212, 175, 55, 0.15);
+  border-radius: 16px;
+  padding: 16px 18px;
+  color: #ffffff;
+  font-family: Inter, system-ui, sans-serif;
+  animation: toastSlideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  transition: all 0.3s ease;
+}
+
+.custom-toast.toast-error {
+  border-color: rgba(239, 68, 68, 0.45);
+  box-shadow: 0 16px 45px rgba(0, 0, 0, 0.6), 0 0 18px rgba(239, 68, 68, 0.2);
+}
+
+.custom-toast.toast-success {
+  border-color: rgba(34, 197, 94, 0.45);
+  box-shadow: 0 16px 45px rgba(0, 0, 0, 0.6), 0 0 18px rgba(34, 197, 94, 0.2);
+}
+
+.custom-toast-icon {
+  font-size: 1.25rem;
+  line-height: 1;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.toast-error .custom-toast-icon { color: #f87171; }
+.toast-success .custom-toast-icon { color: #4ade80; }
+.toast-info .custom-toast-icon { color: #cbac63; }
+
+.custom-toast-body {
+  flex: 1;
+}
+
+.custom-toast-title {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  margin-bottom: 3px;
+  color: #ffffff;
+}
+
+.custom-toast-text {
+  font-size: 13px;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.custom-toast-close {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 1.2rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 2px;
+  margin-left: 6px;
+  transition: color 0.2s ease;
+}
+
+.custom-toast-close:hover {
+  color: #ffffff;
+}
+
+.custom-toast.hide {
+  animation: toastSlideOut 0.3s ease forwards;
+}
+
+@keyframes toastSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes toastSlideOut {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-16px) scale(0.92);
+  }
+}
+
+@media (max-width: 600px) {
+  .custom-toast-container {
+    top: 16px;
+    right: 16px;
+    left: 16px;
+    width: auto;
+  }
 }
 

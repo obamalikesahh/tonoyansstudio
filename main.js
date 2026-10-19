@@ -227,12 +227,18 @@ document.addEventListener('DOMContentLoaded', () => {
     dateInput.setAttribute('min', todayStr);
   }
 
-  // Generate all 15-min slots 08:00 – 16:00
-  function generateTimeSlots() {
+  // Generate all 15-min slots ab 08:30 (Mo-Fr bis 16:00, Sa bis 13:00, So geschlossen)
+  function generateTimeSlots(dayOfWeek) {
+    // 0 = Sonntag, 6 = Samstag
+    if (dayOfWeek === 0) {
+      return []; // Sonntags geschlossen
+    }
+    const endHour = (dayOfWeek === 6) ? 13 : 16; // Samstags bis 13:00, Mo-Fr bis 16:00
     const slots = [];
-    for (let h = 8; h <= 16; h++) {
+    for (let h = 8; h <= endHour; h++) {
       for (let m = 0; m < 60; m += 15) {
-        if (h === 16 && m > 0) break; // stop after 16:00
+        if (h === 8 && m < 30) continue; // Start ab 08:30
+        if (h === endHour && m > 0) break; // Stopp zur vollen Endstunde
         const hh = String(h).padStart(2, '0');
         const mm = String(m).padStart(2, '0');
         slots.push(`${hh}:${mm}`);
@@ -244,7 +250,22 @@ document.addEventListener('DOMContentLoaded', () => {
   // Populate time dropdown for a given date, hiding booked / past slots
   function populateTimeDropdown(selectedDate) {
     if (!timeInput) return;
-    const allSlots = generateTimeSlots();
+
+    // Parse date parts to prevent timezone offsets
+    const [year, month, day] = selectedDate.split('-').map(Number);
+    const dateObj = new Date(year, month - 1, day);
+    const dayOfWeek = dateObj.getDay();
+
+    if (dayOfWeek === 0) {
+      timeInput.innerHTML = '<option value="" disabled selected>Sonntags geschlossen</option>';
+      if (dateInput) {
+        alert('Sonntags hat das Studio geschlossen. Bitte wählen Sie einen Termin von Montag bis Samstag.');
+        dateInput.value = '';
+      }
+      return;
+    }
+
+    const allSlots = generateTimeSlots(dayOfWeek);
     const allBookings = JSON.parse(localStorage.getItem('tonoyans_bookings') || '[]');
     const bookedTimesOnDate = allBookings
       .filter(b => b.date === selectedDate)
@@ -254,7 +275,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const isToday = selectedDate === todayStr;
     const nowMinutes = isToday ? (new Date().getHours() * 60 + new Date().getMinutes()) : -1;
 
-    timeInput.innerHTML = '<option value="">Uhrzeit w\u00e4hlen...</option>';
+    timeInput.innerHTML = '<option value="">Uhrzeit wählen...</option>';
     let hasOptions = false;
 
     allSlots.forEach(slot => {
@@ -276,7 +297,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const opt = document.createElement('option');
       opt.value = '';
       opt.disabled = true;
-      opt.textContent = 'Keine Uhrzeiten verf\u00fcgbar';
+      opt.textContent = 'Keine Uhrzeiten verfügbar';
       timeInput.appendChild(opt);
     }
   }

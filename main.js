@@ -227,22 +227,23 @@ document.addEventListener('DOMContentLoaded', () => {
     dateInput.setAttribute('min', todayStr);
   }
 
-  // Generate all 15-min slots ab 08:30 (Mo-Fr bis 18:00, Sa bis 13:00, So geschlossen)
+  // Generate all 30-min slots: Mo-Fr 08:30 – 17:30, Sa 08:30 – 12:30, So geschlossen
   function generateTimeSlots(dayOfWeek) {
     // 0 = Sonntag, 6 = Samstag
     if (dayOfWeek === 0) {
       return []; // Sonntags geschlossen
     }
-    const endHour = (dayOfWeek === 6) ? 13 : 18; // Samstags bis 13:00, Mo-Fr bis 18:00
+    // Mo-Fr: letzter Slot 17:30, Sa: letzter Slot 12:30
+    const endMinutes = (dayOfWeek === 6) ? (12 * 60 + 30) : (17 * 60 + 30);
+    const startMinutes = 8 * 60 + 30; // 08:30
     const slots = [];
-    for (let h = 8; h <= endHour; h++) {
-      for (let m = 0; m < 60; m += 15) {
-        if (h === 8 && m < 30) continue; // Start ab 08:30
-        if (h === endHour && m > 0) break; // Stopp zur vollen Endstunde
-        const hh = String(h).padStart(2, '0');
-        const mm = String(m).padStart(2, '0');
-        slots.push(`${hh}:${mm}`);
-      }
+
+    for (let current = startMinutes; current <= endMinutes; current += 30) {
+      const h = Math.floor(current / 60);
+      const m = current % 60;
+      const hh = String(h).padStart(2, '0');
+      const mm = String(m).padStart(2, '0');
+      slots.push(`${hh}:${mm}`);
     }
     return slots;
   }

@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/png" href="./favicon.png" />
   <title>TONOYANS STUDIO — Admin Dashboard</title>
 
   <!-- Google Fonts & FontAwesome -->
@@ -640,11 +641,38 @@ TONOYANS STUDIO Schleswig</textarea>
       };
 
       window.deleteBooking = function(id) {
-        if (confirm('Möchtest du diese Buchung wirklich löschen?')) {
+        if (confirm('Möchtest du diese Buchung wirklich löschen? (Keine E-Mail wird gesendet)')) {
           let bookings = JSON.parse(localStorage.getItem('tonoyans_bookings') || '[]');
           bookings = bookings.filter(b => b.id !== id);
           localStorage.setItem('tonoyans_bookings', JSON.stringify(bookings));
           renderData();
+        }
+      };
+
+      window.adminCancelBooking = async function(id, name, email, date, time, service) {
+        if (!confirm(`Termin von ${name} am ${date} um ${time} Uhr stornieren?\n\nEs wird eine Stornierungs-E-Mail an den Kunden und an das Studio gesendet.`)) return;
+
+        // Remove from localStorage
+        let bookings = JSON.parse(localStorage.getItem('tonoyans_bookings') || '[]');
+        bookings = bookings.filter(b => b.id !== id);
+        localStorage.setItem('tonoyans_bookings', JSON.stringify(bookings));
+        renderData();
+
+        // Send cancellation emails via API
+        try {
+          const res = await fetch('/api/cancel-booking', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, email, date, time, service })
+          });
+          if (res.ok) {
+            alert(`✅ Termin storniert! Eine Stornierungs-E-Mail wurde an ${email} gesendet.`);
+          } else {
+            alert('Termin storniert, aber E-Mail konnte nicht gesendet werden.');
+          }
+        } catch (e) {
+          console.error(e);
+          alert('Termin storniert, aber E-Mail konnte nicht gesendet werden.');
         }
       };
 
@@ -934,11 +962,14 @@ TONOYANS STUDIO Schleswig</textarea>
               <td>
                 <span class="status-badge"><i class="fa-solid fa-circle-check"></i> SMS-Verifiziert</span>
               </td>
-              <td>
+              <td style="white-space: nowrap;">
                 <a href="#" class="btn-action-email" onclick="openEmailModal('${escapeHtml(b.email)}'); return false;">
                   <i class="fa-solid fa-paper-plane"></i> E-Mail
                 </a>
-                <button class="btn-delete" onclick="deleteBooking('${b.id}')"><i class="fa-solid fa-trash"></i></button>
+                <button class="btn-cancel-booking" onclick="adminCancelBooking('${escapeHtml(b.id)}', '${escapeHtml(b.name)}', '${escapeHtml(b.email)}', '${escapeHtml(b.date)}', '${escapeHtml(b.time)}', '${escapeHtml(b.service)}')" title="Termin stornieren &amp; E-Mail senden" style="background: rgba(251,146,60,0.15); color: #fb923c; border: 1px solid rgba(251,146,60,0.3); padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; margin-left: 6px; transition: all 0.2s; font-weight:600;">
+                  <i class="fa-solid fa-calendar-xmark"></i> Stornieren
+                </button>
+                <button class="btn-delete" onclick="deleteBooking('${b.id}')" title="Endgültig löschen (keine E-Mail)"><i class="fa-solid fa-trash"></i></button>
               </td>
             </tr>
           `).join('');

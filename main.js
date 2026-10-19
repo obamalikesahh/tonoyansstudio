@@ -216,45 +216,235 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  const emailInput = document.getElementById('cust-email');
+  const nameInput = document.getElementById('cust-name');
+  const dateInput = document.getElementById('cust-date');
+  const timeInput = document.getElementById('cust-time');
+
+  // Set today as minimum date so past dates can't be selected
+  if (dateInput) {
+    const todayStr = new Date().toISOString().split('T')[0];
+    dateInput.setAttribute('min', todayStr);
+  }
+
+  // Generate all 15-min slots 08:00 – 16:00
+  function generateTimeSlots() {
+    const slots = [];
+    for (let h = 8; h <= 16; h++) {
+      for (let m = 0; m < 60; m += 15) {
+        if (h === 16 && m > 0) break; // stop after 16:00
+        const hh = String(h).padStart(2, '0');
+        const mm = String(m).padStart(2, '0');
+        slots.push(`${hh}:${mm}`);
+      }
+    }
+    return slots;
+  }
+
+  // Populate time dropdown for a given date, hiding booked / past slots
+  function populateTimeDropdown(selectedDate) {
+    if (!timeInput) return;
+    const allSlots = generateTimeSlots();
+    const allBookings = JSON.parse(localStorage.getItem('tonoyans_bookings') || '[]');
+    const bookedTimesOnDate = allBookings
+      .filter(b => b.date === selectedDate)
+      .map(b => b.time);
+
+    const todayStr = new Date().toISOString().split('T')[0];
+    const isToday = selectedDate === todayStr;
+    const nowMinutes = isToday ? (new Date().getHours() * 60 + new Date().getMinutes()) : -1;
+
+    timeInput.innerHTML = '<option value="">Uhrzeit w\u00e4hlen...</option>';
+    let hasOptions = false;
+
+    allSlots.forEach(slot => {
+      // Skip already booked
+      if (bookedTimesOnDate.includes(slot)) return;
+      // Skip past times for today
+      if (isToday) {
+        const [sh, sm] = slot.split(':').map(Number);
+        if (sh * 60 + sm <= nowMinutes) return;
+      }
+      const opt = document.createElement('option');
+      opt.value = slot;
+      opt.textContent = slot + ' Uhr';
+      timeInput.appendChild(opt);
+      hasOptions = true;
+    });
+
+    if (!hasOptions) {
+      const opt = document.createElement('option');
+      opt.value = '';
+      opt.disabled = true;
+      opt.textContent = 'Keine Uhrzeiten verf\u00fcgbar';
+      timeInput.appendChild(opt);
+    }
+  }
+
+  // Populate time slots when date changes
+  if (dateInput && timeInput) {
+    dateInput.addEventListener('change', () => {
+      const selectedDate = dateInput.value;
+      if (selectedDate) {
+        populateTimeDropdown(selectedDate);
+      } else {
+        timeInput.innerHTML = '<option value="">Bitte zuerst Datum w\u00e4hlen...</option>';
+      }
+    });
+  }
+
+  // ─────────────────────────────────────────────
+  // FAKE E-MAIL DETECTOR
+  // ─────────────────────────────────────────────
+  const DISPOSABLE_DOMAINS = new Set([
+    'mailinator.com','guerrillamail.com','guerrillamail.info','guerrillamail.biz',
+    'guerrillamail.de','guerrillamail.net','guerrillamail.org','tempmail.com',
+    'tempmail.net','temp-mail.org','temp-mail.io','throwam.com','throwaway.email',
+    '10minutemail.com','10minutemail.net','10minutemail.org','10minutemail.de',
+    'yopmail.com','yopmail.fr','cool.fr.nf','jetable.fr.nf','nospam.ze.tc',
+    'nomail.xl.cx','mega.zik.dj','speed.1s.fr','courriel.fr.nf','moncourrier.fr.nf',
+    'monemail.fr.nf','monmail.fr.nf','fakeinbox.com','mailnull.com','spamgourmet.com',
+    'spamgourmet.net','spamgourmet.org','spamex.com','spamcero.com','trashmail.com',
+    'trashmail.at','trashmail.io','trashmail.me','trashmail.net','trashmail.org',
+    'trashmail.xyz','trash-mail.at','dispostable.com','spamhole.com','spamspot.com',
+    'spamthis.co.uk','mailnesia.com','mailnull.com','maildrop.cc','sharklasers.com',
+    'guerrillamailblock.com','grr.la','guerrillamail.info','spam4.me','spaml.de',
+    'spaml.com','discard.email','spamgob.com','fakemailgenerator.com','mailboxy.fun',
+    'mailsac.com','mailslurp.com','discard.email','getnada.com','inboxbear.com',
+    'mohmal.com','spamwc.de','spamwc.com','spamwc.net','byom.de','sofort-mail.de',
+    'wegwerfmail.de','wegwerfmail.net','wegwerfmail.org','emkei.cz','hatespam.org',
+    'mailnew.com','mailsiphon.com','mailt.me','netmails.net','netmails.com',
+    'nospamfor.us','nowmymail.com','objectmail.com','obobbo.com','oneoffemail.com',
+    'onewaymail.com','pookmail.com','powered.name','proxymail.eu','prtnx.com',
+    'rtrtr.com','s0ny.net','safe-mail.net','safersignup.de','skeefmail.com',
+    'slapsfromlastnight.com','slopsbox.com','smellfear.com','snakemail.com',
+    'sneakemail.com','snkmail.com','sofimail.com','sogetthis.com','speedymail.org',
+    'splyco.com','spofax.com','spamgob.com','spam.la','spoofmail.de',
+    'super-auswahl.de','tempalias.com','tempe-mail.com','tempemail.biz',
+    'tempemail.com','tempemail.net','tempinbox.co.uk','tempinbox.com',
+    'tempomail.fr','temporaryemail.net','temporaryforwarding.com','temporaryinbox.com',
+    'temporarymailaddress.com','thanksnospam.info','thisisnotmyrealemail.com',
+    'throam.com','throwam.com','throwam.net','throwam.org','throwam.us',
+    'trashdevil.com','trashdevil.de','trashemail.de','trashimail.com',
+    'trashmail.at','trashmail.com','trashmail.io','trashmail.me','trbvm.com',
+    'turual.com','twinmail.de','tyldd.com','uggsrock.com','umail.net',
+    'uroid.com','veryrealemail.com','viditag.com','viewcastmedia.com',
+    'viralplays.com','vncoders.net','vomoto.com','vopmail.com','vpn.st',
+    'vsimcard.com','vubby.com','walala.org','watch-harry-potter.com',
+    'webemail.me','weg-werf-email.de','wegwerf-email.de','wegwerf-email.net',
+    'wegwerf-email.org','wegwerfadresse.de','wegwerfemail.com','wegwerfemail.de',
+    'wegwerfemail.net','wegwerfemail.org','wegwerfemails.de','wetrainbayarea.com',
+    'willhackforfood.biz','wilemail.com','willselfdestruct.com','winemaven.info',
+    'wronghead.com','wuzupmail.net','www.e4ward.com','www.gishpuppy.com',
+    'www.mailinator.com','xagloo.co','xagloo.com','xemaps.com','xents.com',
+    'xmaily.com','xoxy.net','xsmail.com','yapped.net','yeah.net','yep.it',
+    'yertxenor.com','yodx.ro','yogamaven.com','yopmail.pp.ua','youmail.ga',
+    'yourdomain.com','yuurok.com','z1p.biz','za.com','zain.site',
+    'zaktouni.fr','zehnminutenmail.de','zetmail.com','zippymail.info',
+    'zoaxe.com','zoemail.net','zoemail.org','zoemail.com','zomg.info',
+  ]);
+
+  function isDisposableEmail(email) {
+    const parts = (email || '').toLowerCase().split('@');
+    if (parts.length !== 2) return false;
+    const domain = parts[1].trim();
+    return DISPOSABLE_DOMAINS.has(domain);
+  }
+
+  function isValidEmailFormat(email) {
+    // Strict RFC-like check: local@domain.tld (tld min 2 chars)
+    return /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/.test(email);
+  }
+
+  // ─────────────────────────────────────────────
+  // FAKE PHONE DETECTOR
+  // ─────────────────────────────────────────────
+  function isValidPhone(phone) {
+    if (!phone) return false;
+    // Strip whitespace, dashes, parentheses
+    const stripped = phone.replace(/[\s\-().+]/g, '');
+    // Must have 7–15 digits
+    if (!/^\d{7,15}$/.test(stripped)) return false;
+    // Reject all-same digit (0000000, 1111111, ...)
+    if (/^(\d)\1{6,}$/.test(stripped)) return false;
+    // Reject sequential patterns (1234567, 7654321)
+    const isSequential = (s) => {
+      for (let i = 1; i < s.length; i++) {
+        if (Math.abs(parseInt(s[i]) - parseInt(s[i-1])) !== 1) return false;
+      }
+      return s.length >= 7;
+    };
+    if (isSequential(stripped)) return false;
+    // Reject known test numbers
+    const testPatterns = ['0000000','1234567','7654321','0123456','9876543',
+      '1111111','2222222','3333333','4444444','5555555','6666666','7777777',
+      '8888888','9999999','12345678','87654321'];
+    if (testPatterns.some(p => stripped.includes(p))) return false;
+    return true;
+  }
+
+  // ─────────────────────────────────────────────
+  // RATE LIMITER (100 requests / 60 min)
+  // ─────────────────────────────────────────────
+  const RATE_LIMIT = 100;
+  const RATE_WINDOW_MS = 60 * 60 * 1000; // 1 hour
+
+  function checkRateLimit() {
+    let timestamps = JSON.parse(localStorage.getItem('tonoyans_req_ts') || '[]');
+    const now = Date.now();
+    timestamps = timestamps.filter(ts => now - ts < RATE_WINDOW_MS);
+    if (timestamps.length >= RATE_LIMIT) {
+      localStorage.setItem('tonoyans_req_ts', JSON.stringify(timestamps));
+      const waitMin = Math.ceil((RATE_WINDOW_MS - (now - Math.min(...timestamps))) / 60000);
+      return { blocked: true, waitMin };
+    }
+    timestamps.push(now);
+    localStorage.setItem('tonoyans_req_ts', JSON.stringify(timestamps));
+    return { blocked: false };
+  }
+
   if (step1Form) {
     step1Form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      
+
+      const emailVal = emailInput ? emailInput.value.trim() : '';
+      const nameVal = nameInput ? nameInput.value.trim() : '';
+      const dateVal = dateInput ? dateInput.value : '';
+      const timeVal = timeInput ? timeInput.value : '';
+      const phoneVal = document.getElementById('cust-phone')?.value?.trim() || '';
+
+      // ── 1. E-Mail Format
+      if (!isValidEmailFormat(emailVal)) {
+        alert('\u274C Bitte gib eine gültige E-Mail-Adresse ein (z. B. name@beispiel.de).');
+        return;
+      }
+
+      // ── 2. Wegwerf-E-Mail
+      if (isDisposableEmail(emailVal)) {
+        alert('\u274C Diese E-Mail-Domain ist nicht erlaubt. Bitte verwende deine echte E-Mail-Adresse (z. B. Gmail, GMX, iCloud).');
+        return;
+      }
+
+      // ── 3. Telefonnummer
+      if (!isValidPhone(phoneVal)) {
+        alert('\u274C Bitte gib eine gültige Handynummer ein. Wegwerf- oder Testnummern werden nicht akzeptiert.');
+        return;
+      }
+
+      // ── 4. CAPTCHA
       const captchaInput = document.getElementById('cust-captcha');
       if (captchaInput && captchaInput.value.toUpperCase() !== currentCaptchaText) {
-        alert('Bot-Schutz: Der eingegebene Code ist falsch!');
+        alert('\u274C Bot-Schutz: Der eingegebene Code ist falsch!');
         generateCaptcha();
         return;
       }
 
-      // Check request limits (Max 3 bookings per session)
-      let reqCount = parseInt(sessionStorage.getItem('tonoyans_booking_req_count') || '0', 10);
-      if (reqCount >= 3) {
-        alert('Bot-Schutz: Zu viele Buchungsanfragen in dieser Sitzung. Bitte versuchen Sie es später erneut.');
+      // ── 5. Rate Limit (100/Stunde)
+      const rateCheck = checkRateLimit();
+      if (rateCheck.blocked) {
+        alert(`\u23F3 Zu viele Anfragen. Bitte warte noch ca. ${rateCheck.waitMin} Minute(n) und versuche es erneut.`);
         return;
       }
-
-      // Hourly limit (max 5 per hour per device)
-      let hourlyBookings = JSON.parse(localStorage.getItem('tonoyans_hourly_bookings') || '[]');
-      const now = Date.now();
-      hourlyBookings = hourlyBookings.filter(ts => now - ts < 3600000); // keep only last 60 mins
-      if (hourlyBookings.length >= 5) {
-        localStorage.setItem('tonoyans_hourly_bookings', JSON.stringify(hourlyBookings));
-        alert('Bot-Schutz: Stündliches Buchungslimit erreicht. Bitte warten Sie eine Weile, bevor Sie weitere Termine anfragen.');
-        return;
-      }
-      hourlyBookings.push(now);
-      localStorage.setItem('tonoyans_hourly_bookings', JSON.stringify(hourlyBookings));
-
-      const emailInput = document.getElementById('cust-email');
-      const nameInput = document.getElementById('cust-name');
-      const dateInput = document.getElementById('cust-date');
-      const timeInput = document.getElementById('cust-time');
-      
-      const emailVal = emailInput ? emailInput.value : '';
-      const nameVal = nameInput ? nameInput.value : '';
-      const dateVal = dateInput ? dateInput.value : '';
-      const timeVal = timeInput ? timeInput.value : '';
 
       // Check Double Booking
       const allBookings = JSON.parse(localStorage.getItem('tonoyans_bookings') || '[]');
@@ -263,8 +453,6 @@ document.addEventListener('DOMContentLoaded', () => {
         alert(`Leider ist am ${dateVal} um ${timeVal} Uhr bereits ein Termin vergeben. Bitte wähle eine andere Uhrzeit.`);
         return;
       }
-
-      sessionStorage.setItem('tonoyans_booking_req_count', reqCount + 1);
 
       if (sentEmailDisplay) sentEmailDisplay.textContent = emailVal;
 

@@ -333,9 +333,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const holidayName = getPublicHoliday(selectedDate);
     if (holidayName) {
-      timeInput.innerHTML = `<option value="" disabled selected>Feiertags geschlossen (${holidayName})</option>`;
+      timeInput.innerHTML = `<option value="" disabled selected>Geschlossen (${holidayName})</option>`;
       if (dateInput) {
-        showToast(`An gesetzlichen Feiertagen (${holidayName}) hat das Studio geschlossen. Bitte wählen Sie einen anderen Werktag.`, 'info', 'Gesetzlicher Feiertag');
+        showToast(`An Feiertagen (${holidayName}) hat das Studio geschlossen. Bitte wählen Sie einen anderen Werktag.`, 'info', 'Feiertag / Geschlossen');
         dateInput.value = '';
       }
       return;
@@ -535,7 +535,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       const holidayMatch = getPublicHoliday(dateVal);
       if (holidayMatch) {
-        showToast(`An gesetzlichen Feiertagen (${holidayMatch}) hat das Studio geschlossen. Bitte wähle einen anderen Werktag.`, 'error', 'Gesetzlicher Feiertag');
+        showToast(`An Feiertagen (${holidayMatch}) hat das Studio geschlossen. Bitte wähle einen anderen Werktag.`, 'error', 'Feiertag / Geschlossen');
         return;
       }
 

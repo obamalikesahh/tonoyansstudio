@@ -25,7 +25,7 @@ export default async function handler(req, res) {
   const holidayName = getPublicHoliday(date);
   if (holidayName) {
     return res.status(400).json({ 
-      message: `An gesetzlichen Feiertagen (${holidayName}) hat unser Studio geschlossen. Bitte wähle einen regulären Werktag.` 
+      message: `An Feiertagen (${holidayName}) hat unser Studio geschlossen. Bitte wähle einen regulären Werktag.` 
     });
   }
 

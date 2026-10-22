@@ -1,5 +1,6 @@
 import nodemailer from 'nodemailer';
 import { Client } from 'pg';
+import { getPublicHoliday } from '../lib/holidays.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -10,6 +11,22 @@ export default async function handler(req, res) {
 
   if (!name || !email || !date || !time) {
     return res.status(400).json({ message: 'Missing required fields' });
+  }
+
+  // Validate Sunday & statutory public holidays
+  const [bYear, bMonth, bDay] = date.split('-').map(Number);
+  const checkDay = new Date(bYear, bMonth - 1, bDay).getDay();
+  if (checkDay === 0) {
+    return res.status(400).json({ 
+      message: 'Sonntags hat das Studio geschlossen. Bitte wähle einen Termin von Montag bis Samstag.' 
+    });
+  }
+
+  const holidayName = getPublicHoliday(date);
+  if (holidayName) {
+    return res.status(400).json({ 
+      message: `An gesetzlichen Feiertagen (${holidayName}) hat unser Studio geschlossen. Bitte wähle einen regulären Werktag.` 
+    });
   }
 
   // Connect to PostgreSQL to check availability and persist booking

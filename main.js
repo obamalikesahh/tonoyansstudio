@@ -3,6 +3,7 @@
 import imgBalayage from './Arbeit/thumb_balayage.png';
 import imgCut from './Arbeit/thumb_cut.png';
 import imgGloss from './Arbeit/thumb_gloss.png';
+import { getPublicHoliday } from './lib/holidays.js';
 
 // Helper: Elegant Studio Toast Notification (replaces browser alert popups)
 function showToast(message, type = 'info', title = null) {
@@ -330,6 +331,16 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
+    const holidayName = getPublicHoliday(selectedDate);
+    if (holidayName) {
+      timeInput.innerHTML = `<option value="" disabled selected>Feiertags geschlossen (${holidayName})</option>`;
+      if (dateInput) {
+        showToast(`An gesetzlichen Feiertagen (${holidayName}) hat das Studio geschlossen. Bitte wählen Sie einen anderen Werktag.`, 'info', 'Gesetzlicher Feiertag');
+        dateInput.value = '';
+      }
+      return;
+    }
+
     timeInput.innerHTML = '<option value="" disabled selected>Lade freie Uhrzeiten...</option>';
 
     let bookedTimesOnDate = [];
@@ -379,14 +390,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Populate time slots when date changes
   if (dateInput && timeInput) {
-    dateInput.addEventListener('change', () => {
+    const handleDateChange = () => {
       const selectedDate = dateInput.value;
       if (selectedDate) {
         populateTimeDropdown(selectedDate);
       } else {
-        timeInput.innerHTML = '<option value="">Bitte zuerst Datum w\u00e4hlen...</option>';
+        timeInput.innerHTML = '<option value="">Bitte zuerst Datum wählen...</option>';
       }
-    });
+    };
+    dateInput.addEventListener('change', handleDateChange);
+    dateInput.addEventListener('input', handleDateChange);
   }
 
   // ─────────────────────────────────────────────
@@ -508,6 +521,23 @@ document.addEventListener('DOMContentLoaded', () => {
       const dateVal = dateInput ? dateInput.value : '';
       const timeVal = timeInput ? timeInput.value : '';
       const phoneVal = document.getElementById('cust-phone')?.value?.trim() || '';
+
+      // ── 0. Datum & Gesetzliche Feiertage / Sonntags-Prüfung
+      if (!dateVal) {
+        showToast('Bitte wähle ein Datum für deinen Termin aus.', 'error', 'Datum fehlt');
+        return;
+      }
+      const [vYear, vMonth, vDay] = dateVal.split('-').map(Number);
+      const chosenDayOfWeek = new Date(vYear, vMonth - 1, vDay).getDay();
+      if (chosenDayOfWeek === 0) {
+        showToast('Sonntags hat das Studio geschlossen. Bitte wähle einen Werktag (Mo–Sa).', 'error', 'Sonntags geschlossen');
+        return;
+      }
+      const holidayMatch = getPublicHoliday(dateVal);
+      if (holidayMatch) {
+        showToast(`An gesetzlichen Feiertagen (${holidayMatch}) hat das Studio geschlossen. Bitte wähle einen anderen Werktag.`, 'error', 'Gesetzlicher Feiertag');
+        return;
+      }
 
       // ── 1. E-Mail Format
       if (!isValidEmailFormat(emailVal)) {

@@ -1011,6 +1011,15 @@ TONOYANS STUDIO Schleswig</textarea>
           if (updatedEl) updatedEl.textContent = 'Zuletzt aktualisiert: ' + new Date().toLocaleTimeString();
 
           // Render Bookings
+          function calcEndTime(timeStr, dur) {
+            if (!timeStr) return '';
+            const [h, m] = timeStr.split(':').map(Number);
+            const total = (h || 0) * 60 + (m || 0) + (Number(dur) || 30);
+            const endH = Math.floor(total / 60);
+            const endM = total % 60;
+            return `${String(endH).padStart(2, '0')}:${String(endM).padStart(2, '0')}`;
+          }
+
           const bookingsBody = document.getElementById('bookings-table-body');
           if (!bookings || bookings.length === 0) {
             bookingsBody.innerHTML = `<tr><td colspan="6" style="text-align:center; color: var(--text-muted); padding: 24px;">Keine Buchungen vorhanden</td></tr>`;
@@ -1032,6 +1041,7 @@ TONOYANS STUDIO Schleswig</textarea>
                 </td>
                 <td>
                   <strong>${escapeHtml(b.date)}</strong> um <strong>${escapeHtml(b.time)} Uhr</strong>
+                  ${b.duration && Number(b.duration) > 30 ? `<br><span style="display:inline-block; margin-top:4px; padding:2px 8px; border-radius:4px; background:rgba(203,172,99,0.15); color:#cbb26a; font-size:11px; font-weight:700;"><i class="fa-solid fa-clock"></i> ${b.duration} Min. (bis ${calcEndTime(b.time, b.duration)} Uhr)</span>` : ''}
                 </td>
                 <td>
                   <span class="status-badge"><i class="fa-solid fa-circle-check"></i> Bestätigt</span>

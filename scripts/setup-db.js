@@ -30,6 +30,10 @@ async function main() {
   `);
 
   await client.query(`
+    ALTER TABLE bookings ADD COLUMN IF NOT EXISTS duration INT DEFAULT 30;
+  `);
+
+  await client.query(`
     CREATE TABLE IF NOT EXISTS registered_users (
       id VARCHAR(255) PRIMARY KEY,
       name VARCHAR(255) NOT NULL,

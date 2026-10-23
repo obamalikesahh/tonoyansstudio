@@ -218,6 +218,31 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // 5. Planity-Style SMS Verification Modal
+  function escapeHtml(str) {
+    return (str || '').replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+  }
+
+  function toMinutes(t) {
+    if (!t || typeof t !== 'string') return 0;
+    const [h, m] = t.split(':').map(Number);
+    return (h || 0) * 60 + (m || 0);
+  }
+
+  function intervalsOverlap(startA, durA, startB, durB) {
+    const aStart = toMinutes(startA);
+    const aEnd = aStart + (durA || 30);
+    const bStart = toMinutes(startB);
+    const bEnd = bStart + (durB || 30);
+    return Math.max(aStart, bStart) < Math.min(aEnd, bEnd);
+  }
+
+  function addMinutes(t, mins) {
+    const total = toMinutes(t) + mins;
+    const h = Math.floor(total / 60);
+    const m = total % 60;
+    return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+  }
+
   const bookingBtns = document.querySelectorAll('.booking-btn');
   const bookingModal = document.getElementById('booking-modal');
   const modalClose = document.getElementById('modal-close');
@@ -230,6 +255,184 @@ document.addEventListener('DOMContentLoaded', () => {
   const sentEmailDisplay = document.getElementById('sent-email-display');
   const backToStep1Btn = document.getElementById('back-to-step1');
   const closeSuccessBtn = document.getElementById('close-success-btn');
+
+  // Multi-service booking state
+  let selectedServices = [];
+  let isDamenBooking = false;
+  let currentBookingDuration = 30; // 30 min for 1 service, 90 min if >= 2 Damen services
+
+  function getAvailableDamenServices() {
+    const damenBtns = document.querySelectorAll('.booking-btn[data-category="damen"]');
+    const services = [];
+    damenBtns.forEach(b => {
+      const name = b.getAttribute('data-service');
+      const price = b.getAttribute('data-price') || b.textContent.trim();
+      if (name && !services.some(s => s.name === name)) {
+        services.push({ name, price });
+      }
+    });
+    return services;
+  }
+
+  function renderDamenAvailableList() {
+    const listEl = document.getElementById('damen-available-list');
+    if (!listEl) return;
+
+    const allDamen = getAvailableDamenServices();
+    const unselected = allDamen.filter(item => !selectedServices.some(s => s.name === item.name));
+
+    if (unselected.length === 0) {
+      listEl.innerHTML = '<p style="font-size:12px; color:#777; margin:6px 0; text-align:center;">Alle verfügbaren Damen-Dienstleistungen wurden hinzugefügt.</p>';
+      return;
+    }
+
+    listEl.innerHTML = unselected.map(item => `
+      <div class="picker-item">
+        <div class="picker-item-info">
+          <span class="picker-item-name">${escapeHtml(item.name)}</span>
+          <span class="picker-item-price">${escapeHtml(item.price)}</span>
+        </div>
+        <button type="button" class="btn-add-picker-item" onclick="addSelectedDamenService('${escapeHtml(item.name)}', '${escapeHtml(item.price)}')">
+          <i class="fa-solid fa-plus"></i> Hinzufügen
+        </button>
+      </div>
+    `).join('');
+  }
+
+  window.addSelectedDamenService = function(name, price) {
+    selectedServices.push({ name, price, category: 'damen' });
+    updateSelectedServicesUI();
+    const pickerEl = document.getElementById('damen-service-picker');
+    if (pickerEl) pickerEl.style.display = 'none';
+  };
+
+  window.removeSelectedDamenService = function(index) {
+    if (index > 0 && index < selectedServices.length) {
+      selectedServices.splice(index, 1);
+      updateSelectedServicesUI();
+    }
+  };
+
+  function updateSelectedServicesUI() {
+    const servicesList = document.getElementById('modal-services-list');
+    const durationPill = document.getElementById('modal-duration-pill');
+    const durationText = document.getElementById('modal-duration-text');
+    const priceDisplay = document.getElementById('modal-service-price');
+    const multiSection = document.getElementById('damen-multi-section');
+    const comboNotice = document.getElementById('damen-combo-notice');
+    const timeDurationHint = document.getElementById('time-slot-duration-hint');
+    const selLabel = document.getElementById('modal-sel-label');
+
+    if (!servicesList || !priceDisplay) return;
+
+    if (!isDamenBooking) {
+      if (multiSection) multiSection.style.display = 'none';
+      if (durationPill) durationPill.style.display = 'none';
+      if (comboNotice) comboNotice.style.display = 'none';
+      if (timeDurationHint) timeDurationHint.style.display = 'none';
+      if (selLabel) selLabel.textContent = 'Gewählte Behandlung:';
+
+      const single = selectedServices[0] || { name: 'Haarbehandlung', price: '' };
+      servicesList.innerHTML = `<strong id="modal-service-title">${escapeHtml(single.name)}</strong>`;
+      priceDisplay.textContent = single.price;
+      currentBookingDuration = 30;
+      return;
+    }
+
+    // Damen Booking
+    if (multiSection) multiSection.style.display = 'block';
+
+    const count = selectedServices.length;
+    // Automatic 90 minutes from 2 or more services, regardless of how many (2, 3, 4, 5, etc.)
+    currentBookingDuration = count >= 2 ? 90 : 30;
+
+    if (selLabel) {
+      selLabel.textContent = count > 1 ? `Gewählte Behandlungen (${count}):` : 'Gewählte Behandlung:';
+    }
+
+    servicesList.innerHTML = selectedServices.map((s, idx) => `
+      <div class="selected-service-chip ${idx === 0 ? 'primary' : ''}">
+        <span><strong>${escapeHtml(s.name)}</strong> <small style="color: #8c7128;">(${escapeHtml(s.price)})</small></span>
+        ${idx > 0 ? `<button type="button" class="remove-service-btn" onclick="removeSelectedDamenService(${idx})" title="Entfernen">&times;</button>` : ''}
+      </div>
+    `).join('');
+
+    // Total price calculation
+    let hasAb = false;
+    let sum = 0;
+    selectedServices.forEach(s => {
+      const pStr = (s.price || '').toLowerCase();
+      if (pStr.includes('ab')) hasAb = true;
+      const match = pStr.match(/(\d+)/);
+      if (match) {
+        sum += parseInt(match[1], 10);
+      }
+    });
+
+    if (sum > 0) {
+      priceDisplay.textContent = (hasAb ? 'ab ' : '') + sum + ' €';
+    } else {
+      priceDisplay.textContent = selectedServices.map(s => s.price).join(' + ');
+    }
+
+    // Duration Badge & Combo Notice
+    if (count >= 2) {
+      if (durationPill) {
+        durationPill.style.display = 'inline-flex';
+        durationPill.classList.add('duration-combo');
+        durationText.innerHTML = '<strong>⏱ Dauer: 90 Min.</strong> (Kombi-Termin)';
+      }
+      if (comboNotice) comboNotice.style.display = 'flex';
+      if (timeDurationHint) timeDurationHint.style.display = 'block';
+    } else {
+      if (durationPill) {
+        durationPill.style.display = 'inline-flex';
+        durationPill.classList.remove('duration-combo');
+        durationText.textContent = 'Dauer: ca. 30–45 Min.';
+      }
+      if (comboNotice) comboNotice.style.display = 'none';
+      if (timeDurationHint) timeDurationHint.style.display = 'none';
+    }
+
+    renderDamenAvailableList();
+
+    // Re-filter time slots if date is selected
+    if (dateInput && dateInput.value) {
+      const prevTime = timeInput ? timeInput.value : '';
+      populateTimeDropdown(dateInput.value).then(() => {
+        if (timeInput && prevTime) {
+          const stillValid = Array.from(timeInput.options).some(o => o.value === prevTime);
+          if (stillValid) {
+            timeInput.value = prevTime;
+          } else {
+            timeInput.value = '';
+            if (count >= 2) {
+              showToast('Uhrzeiten für dein 90-Minuten-Zeitfenster angepasst. Bitte wähle eine freie Uhrzeit.', 'info', '90 Min. Zeitfenster');
+            }
+          }
+        }
+      });
+    }
+  }
+
+  // Picker Button toggles
+  const btnAddDamen = document.getElementById('btn-add-damen-service');
+  const pickerEl = document.getElementById('damen-service-picker');
+  const btnClosePicker = document.getElementById('btn-close-picker');
+
+  if (btnAddDamen && pickerEl) {
+    btnAddDamen.addEventListener('click', () => {
+      const isHidden = pickerEl.style.display === 'none' || !pickerEl.style.display;
+      pickerEl.style.display = isHidden ? 'block' : 'none';
+      if (isHidden) renderDamenAvailableList();
+    });
+  }
+
+  if (btnClosePicker && pickerEl) {
+    btnClosePicker.addEventListener('click', () => {
+      pickerEl.style.display = 'none';
+    });
+  }
 
   let currentCaptchaText = '';
   function generateCaptcha() {
@@ -251,6 +454,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (successScreen) successScreen.classList.add('hidden-step');
     if (step1Form) step1Form.reset();
     if (step2Form) step2Form.reset();
+    if (pickerEl) pickerEl.style.display = 'none';
     generateCaptcha();
   }
 
@@ -259,11 +463,21 @@ document.addEventListener('DOMContentLoaded', () => {
       e.preventDefault();
       const service = btn.getAttribute('data-service') || 'Haarbehandlung';
       const price = btn.getAttribute('data-price') || 'ab 28 €';
+      const category = btn.getAttribute('data-category') || '';
 
-      if (modalServiceTitle) modalServiceTitle.textContent = service;
-      if (modalServicePrice) modalServicePrice.textContent = price;
+      // Multi-service selection is strictly for Damen services
+      isDamenBooking = (category === 'damen') || 
+                       service.toLowerCase().includes('damen') || 
+                       service.toLowerCase().includes('balayage') || 
+                       service.toLowerCase().includes('strähnen') || 
+                       service.toLowerCase().includes('färbung') || 
+                       service.toLowerCase().includes('glossing');
+
+      selectedServices = [{ name: service, price: price, category: isDamenBooking ? 'damen' : category }];
+      currentBookingDuration = 30;
 
       resetModalState();
+      updateSelectedServicesUI();
       if (bookingModal) bookingModal.classList.add('active');
     });
   });
@@ -312,8 +526,7 @@ document.addEventListener('DOMContentLoaded', () => {
     return slots;
   }
 
-  // Populate time dropdown for a given date, hiding booked / past slots
-  // Populate time dropdown for a given date, hiding booked / past slots (from Neon Database)
+  // Populate time dropdown for a given date, calculating 30-min or 90-min availability
   async function populateTimeDropdown(selectedDate) {
     if (!timeInput) return;
 
@@ -343,14 +556,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     timeInput.innerHTML = '<option value="" disabled selected>Lade freie Uhrzeiten...</option>';
 
-    let bookedTimesOnDate = [];
+    let bookingsOnDate = [];
     try {
       const res = await fetch('/api/bookings');
       if (res.ok) {
         const allBookings = await res.json();
-        bookedTimesOnDate = allBookings
+        bookingsOnDate = allBookings
           .filter(b => b.date === selectedDate)
-          .map(b => b.time);
+          .map(b => ({
+            time: b.time,
+            duration: parseInt(b.duration, 10) || 30
+          }));
       }
     } catch(err) {
       console.warn('Could not fetch booked times from server:', err);
@@ -361,20 +577,31 @@ document.addEventListener('DOMContentLoaded', () => {
     const isToday = selectedDate === todayStr;
     const nowMinutes = isToday ? (new Date().getHours() * 60 + new Date().getMinutes()) : -1;
 
+    // Salon closing time: Mo-Fr closes at 18:00 (1080 min), Sa closes at 13:00 (780 min)
+    const salonCloseMinutes = (dayOfWeek === 6) ? (13 * 60) : (18 * 60);
+    const reqDuration = currentBookingDuration || 30;
+
     timeInput.innerHTML = '<option value="">Uhrzeit wählen...</option>';
     let hasOptions = false;
 
     allSlots.forEach(slot => {
-      // Skip already booked on server
-      if (bookedTimesOnDate.includes(slot)) return;
-      // Skip past times for today
-      if (isToday) {
-        const [sh, sm] = slot.split(':').map(Number);
-        if (sh * 60 + sm <= nowMinutes) return;
-      }
+      const slotMin = toMinutes(slot);
+
+      // 1. Check if appointment finishes before closing time
+      if (slotMin + reqDuration > salonCloseMinutes) return;
+
+      // 2. Check overlap with any existing bookings on that date
+      const overlapsExisting = bookingsOnDate.some(b => {
+        return intervalsOverlap(slot, reqDuration, b.time, b.duration);
+      });
+      if (overlapsExisting) return;
+
+      // 3. Skip past times for today
+      if (isToday && slotMin <= nowMinutes) return;
+
       const opt = document.createElement('option');
       opt.value = slot;
-      opt.textContent = slot + ' Uhr';
+      opt.textContent = slot + ' Uhr' + (reqDuration >= 90 ? ` (bis ${addMinutes(slot, reqDuration)} Uhr)` : '');
       timeInput.appendChild(opt);
       hasOptions = true;
     });
@@ -383,7 +610,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const opt = document.createElement('option');
       opt.value = '';
       opt.disabled = true;
-      opt.textContent = 'Keine Uhrzeiten verfügbar';
+      opt.textContent = reqDuration >= 90 ? 'Kein freies 90-Minuten-Zeitfenster verfügbar' : 'Keine Uhrzeiten verfügbar';
       timeInput.appendChild(opt);
     }
   }
@@ -577,9 +804,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const bookingsRes = await fetch('/api/bookings');
         if (bookingsRes.ok) {
           const allBookings = await bookingsRes.json();
-          const isBooked = allBookings.some(b => b.date === dateVal && b.time === timeVal);
+          const durToCheck = currentBookingDuration || 30;
+          const isBooked = allBookings.some(b => {
+            if (b.date !== dateVal) return false;
+            const bDur = parseInt(b.duration, 10) || 30;
+            return intervalsOverlap(timeVal, durToCheck, b.time, bDur);
+          });
           if (isBooked) {
-            showToast(`Leider ist am ${dateVal} um ${timeVal} Uhr bereits ein Termin vergeben. Bitte wähle eine andere Uhrzeit.`, 'error', 'Termin belegt');
+            showToast(`Leider ist am ${dateVal} um ${timeVal} Uhr (${durToCheck} Min.) kein freies Zeitfenster verfügbar oder es überschneidet sich. Bitte wähle eine andere Uhrzeit.`, 'error', 'Termin belegt');
             return;
           }
         }
@@ -653,8 +885,11 @@ document.addEventListener('DOMContentLoaded', () => {
       const phone = document.getElementById('cust-phone')?.value || '';
       const date = document.getElementById('cust-date')?.value || '';
       const time = document.getElementById('cust-time')?.value || '';
-      const service = modalServiceTitle ? modalServiceTitle.textContent : 'Haarbehandlung';
-      const price = modalServicePrice ? modalServicePrice.textContent : '';
+      const service = isDamenBooking && selectedServices.length > 0
+        ? selectedServices.map(s => s.name).join(' + ')
+        : (modalServiceTitle ? modalServiceTitle.textContent : 'Haarbehandlung');
+      const price = document.getElementById('modal-service-price')?.textContent || (modalServicePrice ? modalServicePrice.textContent : '');
+      const duration = currentBookingDuration || 30;
 
       const submitBtn = step2Form.querySelector('button[type="submit"]');
       if (submitBtn) {
@@ -666,7 +901,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const response = await fetch('/api/send-booking', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, email, phone, date, time, service, price })
+          body: JSON.stringify({ name, email, phone, date, time, service, price, duration })
         });
 
         const resData = await response.json();

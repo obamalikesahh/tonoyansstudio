@@ -7,7 +7,8 @@ export default async function handler(req, res) {
     return res.status(405).json({ message: 'Method Not Allowed' });
   }
 
-  const { name, email, phone, date, time, service, price } = req.body;
+  const { name, email, phone, date, time, service, price, duration } = req.body;
+  const bookingDuration = parseInt(duration, 10) || 30;
 
   if (!name || !email || !date || !time) {
     return res.status(400).json({ message: 'Missing required fields' });
@@ -29,6 +30,27 @@ export default async function handler(req, res) {
     });
   }
 
+  function toMinutes(t) {
+    if (!t || typeof t !== 'string') return 0;
+    const [h, m] = t.split(':').map(Number);
+    return (h || 0) * 60 + (m || 0);
+  }
+
+  function intervalsOverlap(startA, durA, startB, durB) {
+    const aStart = toMinutes(startA);
+    const aEnd = aStart + (durA || 30);
+    const bStart = toMinutes(startB);
+    const bEnd = bStart + (durB || 30);
+    return Math.max(aStart, bStart) < Math.min(aEnd, bEnd);
+  }
+
+  function addMinutes(t, mins) {
+    const total = toMinutes(t) + mins;
+    const h = Math.floor(total / 60);
+    const m = total % 60;
+    return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+  }
+
   // Connect to PostgreSQL to check availability and persist booking
   const dbClient = new Client({
     connectionString: process.env.DATABASE_URL
@@ -39,24 +61,29 @@ export default async function handler(req, res) {
   try {
     await dbClient.connect();
 
-    // Check if slot is already booked in database
+    // Check if slot overlaps with any existing booking on this date
     const existing = await dbClient.query(
-      'SELECT id FROM bookings WHERE date = $1 AND time = $2',
-      [date, time]
+      'SELECT id, time, duration FROM bookings WHERE date = $1',
+      [date]
     );
 
-    if (existing.rows.length > 0) {
+    const hasConflict = existing.rows.some(b => {
+      const bDur = parseInt(b.duration, 10) || 30;
+      return intervalsOverlap(time, bookingDuration, b.time, bDur);
+    });
+
+    if (hasConflict) {
       await dbClient.end();
       return res.status(409).json({ 
-        message: `Leider ist am ${date} um ${time} Uhr bereits ein Termin vergeben. Bitte wähle eine andere Uhrzeit.` 
+        message: `Leider ist der Termin am ${date} um ${time} Uhr (${bookingDuration} Min.) bereits belegt oder überschneidet sich mit einer bestehenden Buchung. Bitte wähle eine andere freie Uhrzeit.` 
       });
     }
 
     // Save booking into PostgreSQL
     await dbClient.query(
-      `INSERT INTO bookings (id, name, email, phone, date, time, service, price, status, created_at)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'confirmed', $9)`,
-      [bookingId, name, email, phone || '', date, time, service || '', price || '', new Date().toISOString()]
+      `INSERT INTO bookings (id, name, email, phone, date, time, service, price, duration, status, created_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 'confirmed', $10)`,
+      [bookingId, name, email, phone || '', date, time, service || '', price || '', bookingDuration, new Date().toISOString()]
     );
 
     // Save or update registered user
@@ -100,6 +127,7 @@ export default async function handler(req, res) {
       </div>
     `;
 
+    const endTime = addMinutes(time, bookingDuration);
     const commonTable = `
       <table style="width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 14px;">
         <tr>
@@ -115,12 +143,20 @@ export default async function handler(req, res) {
           <td style="padding: 12px; border-bottom: 1px solid #eee; color: #111;">${phone || '-'}</td>
         </tr>
         <tr>
-          <td style="padding: 12px; border-bottom: 1px solid #eee; font-weight: 600; color: #555;">Behandlung</td>
-          <td style="padding: 12px; border-bottom: 1px solid #eee; color: #111;">${service}</td>
+          <td style="padding: 12px; border-bottom: 1px solid #eee; font-weight: 600; color: #555;">Behandlung(en)</td>
+          <td style="padding: 12px; border-bottom: 1px solid #eee; color: #111;"><strong>${service}</strong></td>
+        </tr>
+        <tr>
+          <td style="padding: 12px; border-bottom: 1px solid #eee; font-weight: 600; color: #555;">Preis</td>
+          <td style="padding: 12px; border-bottom: 1px solid #eee; color: #cbac63; font-weight: 700;">${price || '-'}</td>
+        </tr>
+        <tr>
+          <td style="padding: 12px; border-bottom: 1px solid #eee; font-weight: 600; color: #555;">Dauer</td>
+          <td style="padding: 12px; border-bottom: 1px solid #eee; color: #111;"><strong>${bookingDuration} Minuten</strong> ${bookingDuration >= 90 ? '(Kombi-Termin)' : ''}</td>
         </tr>
         <tr>
           <td style="padding: 12px; font-weight: 600; color: #555;">Datum & Uhrzeit</td>
-          <td style="padding: 12px; color: #111;"><strong>${date}</strong> um <strong>${time} Uhr</strong></td>
+          <td style="padding: 12px; color: #111;"><strong>${date}</strong> von <strong>${time} bis ${endTime} Uhr</strong></td>
         </tr>
       </table>
     `;
